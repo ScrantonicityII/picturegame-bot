@@ -1,34 +1,38 @@
 import json
 import os
-import re
+import praw
+from const import TITLE_PATTERN
 
 
 def initialValuesFromSubreddit(subreddit):
     '''Pull the current subreddit status from Reddit if it is not held on file'''
 
     initialValues = {}
-    regex = re.compile("^\[round \d+\]", re.I) # ignore case
     for submission in subreddit.new(limit=5):
-        if regex.match(submission.title):
+        if TITLE_PATTERN.match(submission.title):
             initialValues["roundNumber"] = int(submission.title.split()[1].strip(']'))
             initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
+            initialValues["unsolved"] = submission.link_flair_text == "UNSOLVED"
             break
     return initialValues
 
 
-def import_data(subreddit):
+def import_data(state):
     '''Import subreddit status from file, or generate new'''
 
     if not os.path.isfile("data/data.json"):
         print("First time use, creating data file...")
-        initialValues = initialValuesFromSubreddit(subreddit)
+        initialValues = initialValuesFromSubreddit(state.subreddit)
         export_data(initialValues)
         return initialValues
 
     print("Loading previously saved data...")
     with open("data/data.json") as data_file:
-        return json.loads(data_file.read())
+        data = json.loads(data_file.read())
+        currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
+        data["unsolved"] = currentRoundSubmission.link_flair_text == "UNSOLVED"
+        return data
 
 
 def export_data(data):
