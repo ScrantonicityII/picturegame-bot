@@ -11,6 +11,7 @@ def initialValuesFromSubreddit(subreddit):
     for submission in subreddit.new(limit=5):
         if regex.match(submission.title):
             initialValues["roundNumber"] = int(submission.title.split()[1].strip(']'))
+            initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
             break
     return initialValues
