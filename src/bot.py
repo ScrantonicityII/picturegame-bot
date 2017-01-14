@@ -9,6 +9,7 @@ def listenForComments(state):
     for comment in state.subreddit.stream.comments():
         if Comment.validate(state, comment):
             onRoundOver(state, comment)
+            break
 
 
 def onRoundOver(state, comment):
