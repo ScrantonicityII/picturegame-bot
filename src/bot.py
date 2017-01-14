@@ -42,7 +42,7 @@ def main():
             else:
                 listenForPosts(state)
     except KeyboardInterrupt:
-        print("Exitting...")
+        print("\nExitting...")
     
 
 if __name__ == "__main__":
