@@ -47,3 +47,10 @@ The correct answer was:\n\n
 [{roundAnswer}](/spoiler)\n\n
 [Go to winning comment]({commentLink})
 '''
+
+REJECTION_COMMENT = '''
+Your submission has been rejected because you have not titled it correctly!\n\n
+
+Please re-post your round with the following title:\n\n
+>{correctTitle}
+'''

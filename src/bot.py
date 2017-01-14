@@ -28,7 +28,17 @@ def onRoundOver(state, comment):
 
 def listenForPosts(state):
     for submission in state.subreddit.stream.submissions():
-        continue
+        if Post.validate(state, submission):
+            onNewRoundPosted(state, submission)
+#            break
+
+
+def onNewRoundPosted(state, submission):
+    if submission.author.name not in {state.currentHost, state.config["botName"]}:
+        state.setState({"currentHost": submission.author.name})
+
+    if not Post.rejectIfInvalid(state, submission):
+        return False
 
 
 def main():
