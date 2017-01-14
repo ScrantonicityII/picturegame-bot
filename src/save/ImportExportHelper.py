@@ -19,26 +19,26 @@ def initialValuesFromSubreddit(subreddit):
     return initialValues
 
 
-def import_data(state):
+def importData(state):
     '''Import subreddit status from file, or generate new'''
 
     if not os.path.isfile("data/data.json"):
         Logger.log("Generating data.json")
         initialValues = initialValuesFromSubreddit(state.subreddit)
-        export_data(initialValues)
+        exportData(initialValues)
         return initialValues
 
     Logger.log("Loading data from data.json")
-    with open("data/data.json") as data_file:
-        data = json.loads(data_file.read())
+    with open("data/data.json") as dataFile:
+        data = json.loads(dataFile.read())
         currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
         data["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
         return data
 
 
-def export_data(data):
+def exportData(data):
     '''Export subreddit status to file'''
 
     Logger.log("Writing data to data.json")
-    with open("data/data.json", 'w') as data_file:
-        data_file.write(json.dumps(data))
+    with open("data/data.json", 'w') as dataFile:
+        dataFile.write(json.dumps(data))

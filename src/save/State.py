@@ -20,7 +20,7 @@ class State:
             self.reddit = praw.Reddit(SCRIPT_NAME)
             self.subreddit = self.reddit.subreddit(SUBREDDIT_NAME)
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
-            self.instance = ImportExportHelper.import_data(self)
+            self.instance = ImportExportHelper.importData(self)
 
     def __getattr__(self, name):
         if name == "reddit":
@@ -32,7 +32,7 @@ class State:
     def setState(self, values):
         for key in values.keys():
             self.instance[key] = values[key]
-        ImportExportHelper.export_data(self.instance)
+        ImportExportHelper.exportData(self.instance)
 
     def awardWin(self, username):
         leaderboard = deepcopy(self.leaderboard)
