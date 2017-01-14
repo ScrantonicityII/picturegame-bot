@@ -2,6 +2,7 @@ import json
 import os
 import praw
 from const import *
+from . import Logger
 
 
 def initialValuesFromSubreddit(subreddit):
@@ -22,12 +23,12 @@ def import_data(state):
     '''Import subreddit status from file, or generate new'''
 
     if not os.path.isfile("data/data.json"):
-        print("First time use, creating data file...")
+        Logger.log("Generating data.json")
         initialValues = initialValuesFromSubreddit(state.subreddit)
         export_data(initialValues)
         return initialValues
 
-    print("Loading previously saved data...")
+    Logger.log("Loading data from data.json")
     with open("data/data.json") as data_file:
         data = json.loads(data_file.read())
         currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
@@ -38,5 +39,6 @@ def import_data(state):
 def export_data(data):
     '''Export subreddit status to file'''
 
+    Logger.log("Writing data to data.json")
     with open("data/data.json", 'w') as data_file:
         data_file.write(json.dumps(data))

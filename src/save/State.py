@@ -3,6 +3,7 @@ from copy import deepcopy
 from . import ImportExportHelper
 import praw
 from const import *
+from . import Logger
 
 class State:
     '''Singleton State object - initialised once at the start of the program.
@@ -15,6 +16,7 @@ class State:
 
     def __init__(self):
         if not State.instance:
+            Logger.log("Initialising State", 'w')
             self.reddit = praw.Reddit(SCRIPT_NAME)
             self.subreddit = self.reddit.subreddit(SUBREDDIT_NAME)
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
