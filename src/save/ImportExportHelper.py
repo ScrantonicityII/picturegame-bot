@@ -5,7 +5,7 @@ from const import *
 from . import Logger
 
 
-def initialValuesFromSubreddit(subreddit):
+def initialValuesFromSubreddit(subreddit, botName):
     '''Pull the current subreddit status from Reddit if it is not held on file'''
 
     initialValues = {}
@@ -15,8 +15,19 @@ def initialValuesFromSubreddit(subreddit):
             initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
             initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
+
+            if not initialValues["unsolved"]:
+                initialValues["roundWonTime"] = getRoundWonTime(submission, botName)
+
             break
+
     return initialValues
+
+
+def getRoundWonTime(submission, botName):
+    for comment in submission.comments.list():
+        if comment.author.name == botName and comment.body.strip().startswith("Congratulations"):
+            return comment.created_utc
 
 
 def importData(state):
@@ -24,7 +35,7 @@ def importData(state):
 
     if not os.path.isfile("data/data.json"):
         Logger.log("Generating data.json")
-        initialValues = initialValuesFromSubreddit(state.subreddit)
+        initialValues = initialValuesFromSubreddit(state.subreddit, state.config["botName"])
         exportData(initialValues)
         return initialValues
 
@@ -33,6 +44,9 @@ def importData(state):
         data = json.loads(dataFile.read())
         currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
         data["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
+
+        if not data["unsolved"]: # make sure we know when the previous round was won
+            data["roundWonTime"] = getRoundWonTime(currentRoundSubmission, state.config["botName"])
         return data
 
 

@@ -38,7 +38,7 @@ class State:
             self.instance[key] = values[key]
         ImportExportHelper.exportData(self.instance)
 
-    def awardWin(self, username):
+    def awardWin(self, username, comment):
         leaderboard = deepcopy(self.leaderboard)
         if username in leaderboard:
             leaderboard[username].wins += 1
@@ -53,6 +53,7 @@ class State:
             "roundNumber": self.roundNumber + 1,
             "currentHost": username,
             "unsolved": False,
-            "leaderboard": leaderboard
+            "leaderboard": leaderboard,
+            "roundWonTime": comment.created_utc
             })
 

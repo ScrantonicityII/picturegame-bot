@@ -18,7 +18,7 @@ def onRoundOver(state, comment):
     replyComment = winningComment.reply(PLUSCORRECT_REPLY)
     replyComment.mod.distinguish()
     Post.setFlair(comment.submission, OVER_FLAIR)
-    state.awardWin(roundWinner.name)
+    state.awardWin(roundWinner.name, winningComment)
     state.subreddit.contributor.add(roundWinner.name)
     Mail.archiveModMail(state)
     roundWinner.message(WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber, subredditName = state.config["subredditName"]))
