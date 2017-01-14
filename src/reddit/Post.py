@@ -35,6 +35,7 @@ def rejectIfInvalid(state, submission):
         rejectionReply.mod.distinguish(sticky = True)
 
         submission.mod.lock()
+        state.subreddit.mod.remove(submission)
         return False
 
     return True
