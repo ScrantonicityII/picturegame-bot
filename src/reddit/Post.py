@@ -13,12 +13,10 @@ def validate(state, submission):
     '''Check that the post meets the following conditions:
     - was posted after the previous round was won
     - is not a self post (rounds are always links, self posts must be mod posts)
-    - is posted by either currentHost or a mod (or the bot?)
     - is not locked
     '''
     return submission.created_utc > state.roundWonTime and \
             not submission.is_self and \
-            submission.author.name in state.mods.union({state.currentHost}) and \
             not submission.locked
 
 
