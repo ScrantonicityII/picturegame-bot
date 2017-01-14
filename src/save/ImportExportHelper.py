@@ -1,7 +1,7 @@
 import json
 import os
 import praw
-from const import TITLE_PATTERN
+from const import *
 
 
 def initialValuesFromSubreddit(subreddit):
@@ -13,7 +13,7 @@ def initialValuesFromSubreddit(subreddit):
             initialValues["roundNumber"] = int(submission.title.split()[1].strip(']'))
             initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
-            initialValues["unsolved"] = submission.link_flair_text == "UNSOLVED"
+            initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
             break
     return initialValues
 
@@ -31,7 +31,7 @@ def import_data(state):
     with open("data/data.json") as data_file:
         data = json.loads(data_file.read())
         currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
-        data["unsolved"] = currentRoundSubmission.link_flair_text == "UNSOLVED"
+        data["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
         return data
 
 
