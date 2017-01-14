@@ -26,7 +26,7 @@ def rejectIfInvalid(state, submission):
     correctTitlePattern = re.compile("^\[Round {}\]".format(state.roundNumber), re.I)
 
     if not correctTitlePattern.match(submission.title):
-        titleRemainder = correctTitlePattern.sub("", submission.title)
+        titleRemainder = TITLE_PATTERN.sub("", submission.title)
         correctTitle = "[Round {}] {}".format(state.roundNumber, titleRemainder)
 
         rejectionReply = submission.reply(REJECTION_COMMENT.format(correctTitle = correctTitle))
