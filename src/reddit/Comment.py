@@ -5,7 +5,7 @@ def validate(state, comment):
             comment.submission.id == state.roundId and \
             comment.author.name in state.mods.union({state.currentHost}) and \
             not comment.is_root and \
-            comment.parent().author.name not in DISALLOWED_NAMES.union({comment.author.name, state.currentHost})
+            comment.parent().author.name not in DISALLOWED_NAMES.union({comment.author.name, state.currentHost, state.config["botName"]})
 
 def postSticky(state, winningComment):
     roundWinner = winningComment.author.name

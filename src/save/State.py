@@ -13,12 +13,14 @@ class State:
     reddit = None
     subreddit = None
     mods = None
+    config = None
 
     def __init__(self):
         if not State.instance:
             Logger.log("Initialising State", 'w')
-            self.reddit = praw.Reddit(SCRIPT_NAME)
-            self.subreddit = self.reddit.subreddit(SUBREDDIT_NAME)
+            self.config = ImportExportHelper.loadOrGenerateConfig()
+            self.reddit = praw.Reddit(self.config["scriptName"])
+            self.subreddit = self.reddit.subreddit(self.config["subredditName"])
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
             self.instance = ImportExportHelper.importData(self)
 
@@ -27,6 +29,8 @@ class State:
             return self.reddit
         if name == "subreddit":
             return self.subreddit
+        if name == "config":
+            return self.config
         return self.instance[name]
 
     def setState(self, values):

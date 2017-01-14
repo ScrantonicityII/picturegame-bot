@@ -42,3 +42,22 @@ def exportData(data):
     Logger.log("Writing data to data.json")
     with open("data/data.json", 'w') as dataFile:
         dataFile.write(json.dumps(data))
+
+
+def loadOrGenerateConfig():
+    if not os.path.isfile("data/config.json"):
+        Logger.log("First time use, generating config.json")
+
+        config = {}
+        config["scriptName"] = input("Enter script name (the same as in praw.ini): ")
+        config["botName"] = input("Enter the reddit username of the bot (case sensitive): ")
+        config["subredditName"] = input("Enter the name of the subreddit (case sensitive): ")
+
+        with open("data/config.json", 'w') as configFile:
+            configFile.write(json.dumps(config))
+
+        return config
+
+    Logger.log("Loading config.json")
+    with open("data/config.json") as configFile:
+        return json.loads(configFile.read())

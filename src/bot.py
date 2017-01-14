@@ -20,8 +20,8 @@ def onRoundOver(state, comment):
     Post.setFlair(comment.submission, OVER_FLAIR)
     state.awardWin(roundWinner.name)
     state.subreddit.contributor.add(roundWinner.name)
-    Mail.archiveModMail(state.reddit)
-    roundWinner.message(WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber, subredditName = SUBREDDIT_NAME))
+    Mail.archiveModMail(state)
+    roundWinner.message(WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber, subredditName = state.config["subredditName"]))
     User.setFlair(state, roundWinner, winningComment)
     Comment.postSticky(state, winningComment)
 

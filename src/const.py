@@ -1,11 +1,7 @@
 import re
 
-SCRIPT_NAME = "pg-bot"
-
-BOT_NAME = "AutoProvium"
 AUTOMOD = "AutoModerator"
-SUBREDDIT_NAME = "PGProvium"
-DISALLOWED_NAMES = {BOT_NAME, AUTOMOD}
+DISALLOWED_NAMES = {AUTOMOD}
 
 TITLE_PATTERN = re.compile("^\[round \d+\]", re.I) # ignore case
 CORRECT_PATTERN = re.compile("\+correct")
