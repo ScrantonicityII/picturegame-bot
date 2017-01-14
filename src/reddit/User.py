@@ -5,9 +5,9 @@ def setFlair(state, user, comment):
     oldFlair = comment.author_flair_text or ""
     flairText = ""
     customFlair = ""
-    if (numWins <= 8 and not LOW_FLAIR_PATTERN.match(oldFlair)) or \
+    if (numWins == 1 and not oldFlair == "") or \
+            (1 < numWins <= 8 and not LOW_FLAIR_PATTERN.match(oldFlair)) or \
             (numWins > 8 and not HIGH_FLAIR_PATTERN.match(oldFlair)):
-        print(oldFlair, LOW_FLAIR_PATTERN.match(oldFlair))
         return # don't update flair if it doesn't match the given format
 
     if numWins < 8:
@@ -16,7 +16,10 @@ def setFlair(state, user, comment):
         customFlair = LOW_FLAIR_PATTERN.sub("", oldFlair)
     else:
         flairText = "{} wins".format(numWins)
-        customFlair = HIGH_FLAIR_PATTERN.sub("", oldFlair)
+        if numWins == 8:
+            customFlair = LOW_FLAIR_PATTERN.sub("", oldFlair)
+        else:
+            customFlair = HIGH_FLAIR_PATTERN.sub("", oldFlair)
 
     newFlair = flairText + customFlair
     state.subreddit.flair.set(user, text = newFlair)

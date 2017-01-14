@@ -5,7 +5,7 @@ DISALLOWED_NAMES = {AUTOMOD}
 
 TITLE_PATTERN = re.compile("^\[round \d+\]", re.I) # ignore case
 CORRECT_PATTERN = re.compile("\+correct")
-LOW_FLAIR_PATTERN = re.compile("^(Round \d+(, \d+)*)|$")
+LOW_FLAIR_PATTERN = re.compile("^Round \d+(, \d+)*")
 HIGH_FLAIR_PATTERN = re.compile("^\d+ wins")
 
 UNSOLVED_FLAIR = "UNSOLVED"
