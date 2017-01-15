@@ -1,5 +1,5 @@
 import re
-from const import TITLE_PATTERN, REJECTION_COMMENT
+from const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT
 
 
 def setFlair(submission, flair):
@@ -26,7 +26,7 @@ def rejectIfInvalid(state, submission):
     correctTitlePattern = re.compile("^\[Round {}\]".format(state.roundNumber), re.I)
 
     if not correctTitlePattern.match(submission.title):
-        titleRemainder = TITLE_PATTERN.sub("", submission.title)
+        titleRemainder = TITLE_CORRECTION_PATTERN.sub("", submission.title)
         correctTitle = "[Round {}] {}".format(state.roundNumber, titleRemainder)
 
         rejectionReply = submission.reply(REJECTION_COMMENT.format(correctTitle = correctTitle))
