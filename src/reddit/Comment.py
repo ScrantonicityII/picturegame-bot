@@ -9,7 +9,7 @@ def validate(state, comment):
     - the person being +corrected is not any of the bots, the current host, or the person giving the +correct (who may not be the host)
     '''
 
-    return CORRECT_PATTERN.match(comment.body) and \
+    return CORRECT_PATTERN.search(comment.body) and \
             comment.submission.id == state.roundId and \
             comment.author.name in state.mods.union({state.currentHost}) and \
             not comment.is_root and \
