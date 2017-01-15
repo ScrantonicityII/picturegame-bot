@@ -41,8 +41,8 @@ class State:
     def awardWin(self, username, comment):
         leaderboard = deepcopy(self.leaderboard)
         if username in leaderboard:
-            leaderboard[username].wins += 1
-            leaderboard[username].rounds.append(self.roundNumber)
+            leaderboard[username]["wins"] += 1
+            leaderboard[username]["rounds"].append(self.roundNumber)
         else:
             leaderboard[username] = {
                     "wins": 1,
