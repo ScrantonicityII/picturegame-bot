@@ -74,3 +74,10 @@ If a user guesses correctly simply respond with *+correct*, the bot will do the 
 
 Please remember *if you answer correctly you will need to host the next round.* **New?** See our [guide](/r/{subredditName}/wiki/beginners)\n\n
 '''
+
+
+LEADERBOARD_HEADER = '''# Leaderboard
+
+Rank | Username | Rounds won | Total |
+|:--:|:--:|:--|:--:|:--:|
+'''

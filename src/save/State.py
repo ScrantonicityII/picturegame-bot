@@ -1,28 +1,28 @@
-from copy import deepcopy
+import json
 
 from . import ImportExportHelper
 import praw
 from const import *
 from . import Logger
+from reddit import Wiki
 
 class State:
     '''Singleton State object - initialised once at the start of the program.
     Subsequent calls to State() return the same instance.'''
 
-    instance = None
     reddit = None
     subreddit = None
     mods = None
     config = None
 
     def __init__(self):
-        if not State.instance:
+        if not State.config:
             Logger.log("Initialising State", 'w')
             self.config = ImportExportHelper.loadOrGenerateConfig()
             self.reddit = praw.Reddit(self.config["scriptName"])
             self.subreddit = self.reddit.subreddit(self.config["subredditName"])
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
-            self.instance = ImportExportHelper.importData(self)
+            ImportExportHelper.importData(self) # don't need to assign this since we'll access everything from the subreddit's wiki
 
     def __getattr__(self, name):
         if name == "reddit":
@@ -31,29 +31,41 @@ class State:
             return self.subreddit
         if name == "config":
             return self.config
-        return self.instance[name]
+        if name == "mods":
+            return self.mods
+        if name == "leaderboard":
+            return Wiki.scrapeLeaderboard(self.subreddit)
+        return self.getInstance(name)
+
+    def getInstance(self, attr = None):
+        instance = json.loads(self.subreddit.wiki["data"].content_md)
+        if attr is None:
+            return instance
+        return instance[attr]
 
     def setState(self, values):
+        currentInstance = self.getInstance()
         for key in values.keys():
-            self.instance[key] = values[key]
-        ImportExportHelper.exportData(self.instance)
+            currentInstance[key] = values[key]
+        ImportExportHelper.exportData(self.subreddit, currentInstance)
 
     def awardWin(self, username, comment):
-        leaderboard = deepcopy(self.leaderboard)
+        leaderboard = self.leaderboard
+        roundNumber = self.roundNumber
         if username in leaderboard:
             leaderboard[username]["wins"] += 1
-            leaderboard[username]["rounds"].append(self.roundNumber)
+            leaderboard[username]["rounds"].append(roundNumber)
         else:
             leaderboard[username] = {
                     "wins": 1,
-                    "rounds": [self.roundNumber]
+                    "rounds": [roundNumber]
                     }
 
         self.setState({
-            "roundNumber": self.roundNumber + 1,
+            "roundNumber": roundNumber + 1,
             "currentHost": username,
             "unsolved": False,
-            "leaderboard": leaderboard,
             "roundWonTime": comment.created_utc
             })
 
+        ImportExportHelper.exportLeaderboard(self.subreddit, leaderboard)
