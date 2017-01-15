@@ -3,9 +3,12 @@
 from save.State import State
 from reddit import Comment, Post, Mail, User
 from const import *
+from save import Logger
 
 
 def listenForComments(state):
+    Logger.log("Listening for +correct on round {}...".format(state.roundNumber))
+
     for comment in state.subreddit.stream.comments():
         if Comment.validate(state, comment):
             onRoundOver(state, comment)
@@ -15,19 +18,27 @@ def listenForComments(state):
 def onRoundOver(state, comment):
     winningComment = comment.parent()
     roundWinner = winningComment.author
+    Logger.log("Round {} won by {}".format(state.roundNumber, roundWinner.name))
+
     replyComment = winningComment.reply(PLUSCORRECT_REPLY)
     replyComment.mod.distinguish()
+
     Post.setFlair(comment.submission, OVER_FLAIR)
+
     state.awardWin(roundWinner.name, winningComment)
+
     state.subreddit.contributor.add(roundWinner.name)
     Mail.archiveModMail(state)
+
     roundWinner.message(WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber, subredditName = state.config["subredditName"]))
     User.setFlair(state, roundWinner, winningComment)
+
     Comment.postSticky(state, winningComment)
 
 
 def listenForPosts(state):
     Logger.log("Listening for new rounds...")
+
     for submission in state.subreddit.stream.submissions():
         if Post.validate(state, submission):
             if onNewRoundPosted(state, submission):
