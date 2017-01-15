@@ -3,6 +3,7 @@ import os
 import praw
 from const import *
 from . import Logger
+from reddit import Wiki
 
 
 def initialValuesFromSubreddit(subreddit, botName):
@@ -15,6 +16,7 @@ def initialValuesFromSubreddit(subreddit, botName):
             initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
             initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
+            initialValues["leaderboard"] = Wiki.scrapeLeaderboard(subreddit)
 
             if not initialValues["unsolved"]:
                 initialValues["roundWonTime"] = getRoundWonTime(submission, botName)
