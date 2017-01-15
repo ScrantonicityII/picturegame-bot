@@ -54,3 +54,22 @@ Your submission has been rejected because you have not titled it correctly!\n\n
 Please re-post your round with the following title:\n\n
 >{correctTitle}
 '''
+
+NEW_ROUND_COMMENT = '''
+#*Chat*:\n\n
+
+Join the official [{subredditName} Discord](http://discord.gg/013eeoM1NYuYmJHpe) chat to discuss this and future rounds!\n\n
+
+Mobile apps also available: [Apple](https://itunes.apple.com/us/app/discord-chat-for-gamers/id985746746?mt=8), [Android](https://play.google.com/store/apps/details?id=com.discord&hl=en)\n\n
+
+#*{hostName}*:\n\n
+
+Thank you for posting a new round. Please remember leaving a round without +correcting the winner is a **punishable  offence**.\n\n
+
+If a user guesses correctly simply respond with *+correct*, the bot will do the rest of the work for you (unless the [bot is down](/r/{subredditName}/wiki/hosting#wiki_bot_not_responding.3F))\n\n
+
+**Confused or new?** See the [hosting guide](/r/{subredditName}/wiki/hosting) for the answer to all your problems.\n
+#*Other users*:\n\n
+
+Please remember *if you answer correctly you will need to host the next round.* **New?** See our [guide](/r/{subredditName}/wiki/beginners)\n\n
+'''

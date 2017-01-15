@@ -27,18 +27,37 @@ def onRoundOver(state, comment):
 
 
 def listenForPosts(state):
+    Logger.log("Listening for new rounds...")
     for submission in state.subreddit.stream.submissions():
         if Post.validate(state, submission):
-            onNewRoundPosted(state, submission)
-#            break
+            if onNewRoundPosted(state, submission):
+                break
 
 
 def onNewRoundPosted(state, submission):
-    if submission.author.name not in {state.currentHost, state.config["botName"]}:
-        state.setState({"currentHost": submission.author.name})
-
     if not Post.rejectIfInvalid(state, submission):
         return False
+
+    Post.setFlair(submission, UNSOLVED_FLAIR)
+
+    if submission.author.name not in state.mods: # don't remove submissions perms from mods
+        state.subreddit.contributor.remove(submission.author)
+    if submission.author.name != state.currentHost and state.currentHost not in state.mods: # de-perm the original +CP if someone else took over
+        state.subreddit.contributor.remove(state.currentHost)
+
+    newRoundReply = submission.reply(NEW_ROUND_COMMENT.format(hostName = submission.author.name, subredditName = state.config["subredditName"]))
+    newRoundReply.mod.distinguish()
+
+    newState = {
+            "unsolved": True,
+            "roundId": submission.id
+            }
+    if submission.author.name != state.currentHost:
+        newState["currentHost"] = submission.author.name
+
+    state.setState(newState)
+
+    return True
 
 
 def main():
