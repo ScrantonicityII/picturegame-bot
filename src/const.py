@@ -53,7 +53,7 @@ REJECTION_COMMENT = '''
 Your submission has been rejected because you have not titled it correctly!\n\n
 
 Please re-post your round with the following title:\n\n
->{correctTitle}
+[{correctTitle}](http://www.reddit.com/r/{subredditName}/submit?title={correctTitle})
 '''
 
 NEW_ROUND_COMMENT = '''

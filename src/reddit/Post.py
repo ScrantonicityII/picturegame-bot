@@ -29,7 +29,7 @@ def rejectIfInvalid(state, submission):
         titleRemainder = TITLE_CORRECTION_PATTERN.sub("", submission.title)
         correctTitle = "[Round {}] {}".format(state.roundNumber, titleRemainder)
 
-        rejectionReply = submission.reply(REJECTION_COMMENT.format(correctTitle = correctTitle))
+        rejectionReply = submission.reply(REJECTION_COMMENT.format(correctTitle = correctTitle, subredditName = state.config["subredditName"]))
         rejectionReply.mod.distinguish(sticky = True)
 
         submission.mod.lock()
