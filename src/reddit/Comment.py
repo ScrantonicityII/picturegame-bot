@@ -6,14 +6,19 @@ def validate(state, comment):
     - is a comment on the current round
     - is posted by either the current host or a mod
     - is not a top-level comment
-    - the person being +corrected is not any of the bots, the current host, or the person giving the +correct (who may not be the host)
+    - the person being +corrected is not any of the bots or the current host
+    - the person giving the +correct is not the same person receiving it, unless that person is a mod
     '''
+
+    correcter = comment.author.name
+    receiver = comment.parent().author.name
 
     return CORRECT_PATTERN.search(comment.body) and \
             comment.submission.id == state.roundId and \
-            comment.author.name in state.mods.union({state.currentHost}) and \
+            correcter in state.mods.union({state.currentHost}) and \
             not comment.is_root and \
-            comment.parent().author.name not in DISALLOWED_NAMES.union({comment.author.name, state.currentHost, state.config["botName"]})
+            receiver not in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}) and \
+            (receiver != correcter or correcter in state.mods)
 
 def postSticky(state, winningComment):
     roundWinner = winningComment.author.name
