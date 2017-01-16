@@ -20,6 +20,8 @@ def onRoundOver(state, comment):
     roundWinner = winningComment.author
     Logger.log("Round {} won by {}".format(state.roundNumber, roundWinner.name))
 
+    Post.deleteExtraPosts(state, comment.submission) # delete extra posts before anything else so we don't accidentally delete the next round
+
     replyComment = winningComment.reply(PLUSCORRECT_REPLY)
     replyComment.mod.distinguish()
 

@@ -37,3 +37,14 @@ def rejectIfInvalid(state, submission):
         return False
 
     return True
+
+
+def deleteExtraPosts(state, previousRound):
+    '''Delete any posts that were made during the previous round. Ignore self (mod) posts'''
+
+    for submission in state.subreddit.new():
+        if submission.id == previousRound.id:
+            return
+
+        if not submission.is_self:
+            state.subreddit.mod.remove(submission)
