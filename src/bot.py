@@ -51,9 +51,8 @@ def onNewRoundPosted(state, submission):
 
     Post.setFlair(submission, UNSOLVED_FLAIR)
 
-    if submission.author.name not in state.mods: # don't remove submissions perms from mods
-        state.subreddit.contributor.remove(submission.author)
-    if submission.author.name != state.currentHost and state.currentHost not in state.mods: # de-perm the original +CP if someone else took over
+    state.subreddit.contributor.remove(submission.author)
+    if submission.author.name != state.currentHost: # de-perm the original +CP if someone else took over
         state.subreddit.contributor.remove(state.currentHost)
 
     newRoundReply = submission.reply(NEW_ROUND_COMMENT.format(hostName = submission.author.name, subredditName = state.config["subredditName"]))
