@@ -26,8 +26,11 @@ You have been PM'd the instructions for continuing the game.
 WINNER_SUBJECT = "Congratulations, you can post the next round!"
 WINNER_PM = '''
     Congratulations on winning the last round!
+
     Your account should now be approved to submit to /r/{subredditName} to submit a new round.
+
     Please share how you got the answer in the comments.
+
     Please remember that your title must start with "[Round {roundNum}]".
 
 ---
@@ -41,7 +44,9 @@ WINNER_PM = '''
 ROUND_OVER_STICKY = '''#Congratulations to {winnerName} on winning this round!
 
 The correct answer was:
+
 [{roundAnswer}](/spoiler)
+
 [Go to winning comment]({commentLink})'''
 
 REJECTION_COMMENT = '''Your submission has been rejected because you have not titled it correctly!
