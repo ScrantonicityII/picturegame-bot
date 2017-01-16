@@ -1,4 +1,5 @@
 import json
+import os
 
 from . import ImportExportHelper
 import praw
@@ -16,6 +17,9 @@ class State:
     config = None
 
     def __init__(self):
+        if not os.path.isdir("data"):
+            os.mkdir("data")
+
         if not State.config:
             Logger.log("Initialising State", 'w')
             self.config = ImportExportHelper.loadOrGenerateConfig()
