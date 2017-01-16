@@ -10,8 +10,13 @@ def validate(state, comment):
     - the person giving the +correct is not the same person receiving it, unless that person is a mod
     '''
 
+    receivingComment = comment.parent()
+
+    if comment.author is None or receivingComment.author is None:
+        return False # ignore deleted comments
+
     correcter = comment.author.name
-    receiver = comment.parent().author.name
+    receiver = receivingComment.author.name
 
     return CORRECT_PATTERN.search(comment.body) and \
             comment.submission.id == state.roundId and \
