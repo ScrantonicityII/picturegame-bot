@@ -15,6 +15,7 @@ class State:
     subreddit = None
     mods = None
     config = None
+    instance = None
 
     def __init__(self):
         if not os.path.isdir("data"):
@@ -26,7 +27,7 @@ class State:
             self.reddit = praw.Reddit(self.config["scriptName"])
             self.subreddit = self.reddit.subreddit(self.config["subredditName"])
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
-            ImportExportHelper.importData(self) # don't need to assign this since we'll access everything from the subreddit's wiki
+            self.instance = ImportExportHelper.importData(self)
 
     def __getattr__(self, name):
         if name == "reddit":
@@ -39,19 +40,12 @@ class State:
             return self.mods
         if name == "leaderboard":
             return Wiki.scrapeLeaderboard(self.subreddit)
-        return self.getInstance(name)
-
-    def getInstance(self, attr = None):
-        instance = json.loads(self.subreddit.wiki["data"].content_md)
-        if attr is None:
-            return instance
-        return instance[attr]
+        return self.instance[name]
 
     def setState(self, values):
-        currentInstance = self.getInstance()
         for key in values.keys():
-            currentInstance[key] = values[key]
-        ImportExportHelper.exportData(self.subreddit, currentInstance)
+            self.instance[key] = values[key]
+        ImportExportHelper.exportData(self.instance)
 
     def awardWin(self, username, comment):
         leaderboard = self.leaderboard

@@ -32,41 +32,33 @@ def getRoundWonTime(submission, botName):
 
 
 def importData(state):
-    '''Import subreddit status from subreddit wiki, or generate new'''
+    '''Import subreddit status from file, or generate new'''
 
-    wikiData = {}
+    if not os.path.isfile("data/data.json"):
+        Logger.log("Generating new data.json")
 
-    try:
-        Logger.log("Attempting to load data from subreddit wiki")
-        wikiData = json.loads(state.subreddit.wiki["data"].content_md)
-
-    except (TypeError, json.decoder.JSONDecodeError): # data has not been initialised yet
-        Logger.log("No data found, generating subreddit wiki store")
         initialValues = initialValuesFromSubreddit(state.subreddit, state.config["botName"])
-        leaderboard = Wiki.scrapeLeaderboard(state.subreddit)
+        exportData(initialValues)
 
-        exportData(state.subreddit, initialValues)
-        backupLeaderboard(leaderboard)
-        return
+        return initialValues
 
-    Logger.log("Data found")
-    currentRoundSubmission = praw.models.Submission(state.reddit, wikiData["roundId"])
-    wikiData["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
+    Logger.log("Loading data from data.json")
+    data = {}
+    with open("data/data.json") as dataFile:
+        data = json.loads(dataFile.read())
 
-    if not wikiData["unsolved"]: # make sure we know when the previous round was won
-        wikiData["roundWonTime"] = getRoundWonTime(currentRoundSubmission, state.config["botName"])
+    currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
+    data["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
 
-    exportData(state.subreddit, wikiData)
+    if not data["unsolved"]: # make sure we know when the previous round was won
+        data["roundWonTime"] = getRoundWonTime(currentRoundSubmission, state.config["botName"])
 
-
-def exportData(subreddit, data):
-    Logger.log("Exporting data to subreddit")
-    subreddit.wiki["data"].edit(json.dumps(data, indent = 4))
-    backupData(data)
+    exportData(data)
+    return data
 
 
-def backupData(data):
-    Logger.log("Backing up data to data.json")
+def exportData(data):
+    Logger.log("Exporting data to data.json")
     with open("data/data.json", 'w') as dataFile:
         dataFile.write(json.dumps(data))
 
@@ -74,10 +66,7 @@ def backupData(data):
 def exportLeaderboard(subreddit, leaderboard):
     Logger.log("Exporting leaderboard to subreddit")
     Wiki.exportLeaderboard(subreddit, leaderboard)
-    backupLeaderboard(leaderboard)
 
-
-def backupLeaderboard(leaderboard):
     Logger.log("Backing up leaderboard to leaderboard.json")
     with open("data/leaderboard.json", 'w') as leaderboardFile:
         leaderboardFile.write(json.dumps(leaderboard))
