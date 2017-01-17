@@ -13,6 +13,11 @@ def listenForComments(state):
 
     while True:
         currentSubmission = state.reddit.submission(id = state.roundId)
+        
+        if currentSubmission.author is None: # Round has been deleted
+            Logger.log("Round deleted, going back to listening for rounds")
+            state.setState({ "unsolved": False })
+            return
 
         currentSubmission.comments.replace_more(limit = 0)
         commentList = currentSubmission.comments.list()
