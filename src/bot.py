@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from time import sleep
+
 from save.State import State
 from reddit import Comment, Post, Mail, User
 from const import *
@@ -9,10 +11,22 @@ from save import Logger
 def listenForComments(state):
     Logger.log("Listening for +correct on round {}...".format(state.roundNumber))
 
-    for comment in state.subreddit.stream.comments():
-        if Comment.validate(state, comment):
-            onRoundOver(state, comment)
-            break
+    while True:
+        currentSubmission = state.reddit.submission(id = state.roundId)
+
+        currentSubmission.comments.replace_more(limit = 0)
+        commentList = currentSubmission.comments.list()
+        sortedComments = sorted(commentList, key = lambda comment: comment.created_utc)
+        for comment in sortedComments:
+            if comment.id in state.seenComments:
+                continue
+
+            state.seenComments.add(comment.id)
+            if Comment.validate(state, comment):
+                onRoundOver(state, comment)
+                return
+
+        sleep(10) # Wait a while before checking again to avoid doing too many requests
 
 
 def onRoundOver(state, comment):
@@ -28,6 +42,7 @@ def onRoundOver(state, comment):
     Post.setFlair(comment.submission, OVER_FLAIR)
 
     state.awardWin(roundWinner.name, winningComment)
+    state.seenComments = set()
 
     state.subreddit.contributor.add(roundWinner.name)
     Mail.archiveModMail(state)

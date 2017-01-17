@@ -16,6 +16,7 @@ class State:
     mods = None
     config = None
     instance = None
+    seenComments = None
 
     def __init__(self):
         if not os.path.isdir("data"):
@@ -28,6 +29,7 @@ class State:
             self.subreddit = self.reddit.subreddit(self.config["subredditName"])
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
             self.instance = ImportExportHelper.importData(self)
+            self.seenComments = set()
 
     def __getattr__(self, name):
         if name == "reddit":

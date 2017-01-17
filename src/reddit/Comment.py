@@ -3,7 +3,6 @@ from const import *
 def validate(state, comment):
     '''Check that the comment meets the following conditions:
     - contains the string `+correct`
-    - is a comment on the current round
     - is posted by either the current host or a mod
     - is not a top-level comment
     - the person being +corrected is not any of the bots or the current host
@@ -19,7 +18,6 @@ def validate(state, comment):
     receiver = receivingComment.author.name
 
     return CORRECT_PATTERN.search(comment.body) and \
-            comment.submission.id == state.roundId and \
             correcter in state.mods.union({state.currentHost}) and \
             not comment.is_root and \
             receiver not in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}) and \
