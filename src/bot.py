@@ -13,6 +13,15 @@ def listenForComments(state):
 
     while True:
         currentSubmission = state.reddit.submission(id = state.roundId)
+
+        # Check for stray posts (ignore mod posts)
+        for submission in state.subreddit.new(limit=5):
+            if submission.id == state.roundId or submission.id in state.seenPosts:
+                break
+            if not submission.is_self:
+                reply = submission.reply(DUPLICATE_ROUND_REPLY.format(roundUrl = currentSubmission.permalink))
+                reply.mod.distinguish()
+            state.seenPosts.add(submission.id)
         
         if currentSubmission.author is None: # Round has been deleted
             Logger.log("Round deleted, going back to listening for rounds")
@@ -46,8 +55,11 @@ def onRoundOver(state, comment):
 
     Post.setFlair(comment.submission, OVER_FLAIR)
 
+    state.subreddit.contributor.remove(state.currentHost)
+
     state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
+    state.seenPosts = set()
 
     state.subreddit.contributor.add(roundWinner.name)
     Mail.archiveModMail(state)
@@ -73,7 +85,6 @@ def onNewRoundPosted(state, submission):
 
     Post.setFlair(submission, UNSOLVED_FLAIR)
 
-    state.subreddit.contributor.remove(submission.author)
     if submission.author.name != state.currentHost: # de-perm the original +CP if someone else took over
         state.subreddit.contributor.remove(state.currentHost)
 

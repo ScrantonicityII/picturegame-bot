@@ -72,6 +72,10 @@ If a user guesses correctly simply respond with *+correct*, the bot will do the 
 
 Please remember *if you answer correctly you will need to host the next round.* **New?** See our [guide](/r/{subredditName}/wiki/beginners)'''
 
+DUPLICATE_ROUND_REPLY = '''It looks like you've posted something new while there is already a round ongoing [here]({roundUrl}).
+
+If you want this post to replace the current round, please **delete the existing round**, and I will start watching this thread instead. Otherwise 
+this thread will be removed when the round is over.'''
 
 LEADERBOARD_HEADER = '''# Leaderboard
 
