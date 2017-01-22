@@ -1,7 +1,7 @@
 from const import LOW_FLAIR_PATTERN, HIGH_FLAIR_PATTERN
 
 def setFlair(state, user, comment):
-    numWins = state.leaderboard[user.name]["wins"]
+    numWins = state.roundWinner["wins"]
     oldFlair = comment.author_flair_text or ""
     flairText = ""
     customFlair = ""
@@ -13,7 +13,7 @@ def setFlair(state, user, comment):
         return # don't update flair if it doesn't match the given format
 
     if numWins < 8:
-        rounds = state.leaderboard[user.name]["rounds"]
+        rounds = state.roundWinner["rounds"]
         flairText = "Round " + ", ".join([str(roundNum) for roundNum in rounds])
         if numWins > 1:
             customFlair = LOW_FLAIR_PATTERN(numWins - 1).sub("", oldFlair)

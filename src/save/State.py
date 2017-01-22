@@ -56,20 +56,31 @@ class State:
     def awardWin(self, username, comment):
         leaderboard = self.leaderboard
         roundNumber = self.roundNumber
+
+        numWins = 0
+        rounds = []
+
         if username in leaderboard:
-            leaderboard[username]["wins"] += 1
-            leaderboard[username]["rounds"].append(roundNumber)
+            numWins = leaderboard[username]["wins"] + 1
+            rounds = leaderboard[username]["rounds"] + [roundNumber]
         else:
-            leaderboard[username] = {
-                    "wins": 1,
-                    "rounds": [roundNumber]
-                    }
+            numWins = 1
+            rounds = [roundNumber]
+
+        leaderboard[username] = {
+                "wins": numWins,
+                "rounds": rounds
+                }
 
         self.setState({
             "roundNumber": roundNumber + 1,
             "currentHost": username,
             "unsolved": False,
-            "roundWonTime": comment.created_utc
+            "roundWonTime": comment.created_utc,
+            "roundWinner": {
+                "wins": numWins,
+                "rounds": rounds
+                }
             })
 
         ImportExportHelper.exportLeaderboard(self.subreddit, leaderboard)
