@@ -9,7 +9,7 @@ CORRECT_PATTERN = re.compile("\+correct")
 HIGH_FLAIR_PATTERN = re.compile("^(\d+ wins)|$")
 
 def LOW_FLAIR_PATTERN(numRounds):
-    pattern = "^(Round \d+(, \d+){0,%d})|$" % numRounds - 1
+    pattern = "^(Round \d+(, \d+){0,%d})|$" % (numRounds - 1)
     return re.compile(pattern)
 
 UNSOLVED_FLAIR = "UNSOLVED"
