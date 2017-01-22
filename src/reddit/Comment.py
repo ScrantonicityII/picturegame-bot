@@ -23,9 +23,19 @@ def validate(state, comment):
             receiver not in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}) and \
             (receiver != correcter or correcter in state.mods)
 
+
 def postSticky(state, winningComment):
     roundWinner = winningComment.author.name
+    roundSubmission = winningComment.submission
     commentLink = COMMENT_URL.format(postId = state.roundId, commentId = winningComment.id)
     roundAnswer = winningComment.body
-    stickyReply = winningComment.submission.reply(ROUND_OVER_STICKY.format(winnerName = roundWinner, roundAnswer = roundAnswer, commentLink = commentLink))
-    stickyReply.mod.distinguish(sticky=True)
+    stickyReply = roundSubmission.reply(ROUND_OVER_STICKY.format(winnerName = roundWinner, roundAnswer = roundAnswer, commentLink = commentLink))
+    stickyReply.mod.distinguish(sticky = not roundHasSticky(roundSubmission))
+
+
+def roundHasSticky(submission):
+    submission.comments.replace_more(limit = 0)
+    for comment in submission.comments.list():
+        if comment.stickied:
+            return True
+    return False
