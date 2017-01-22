@@ -23,7 +23,7 @@ def listenForComments(state):
                 reply.mod.distinguish()
             state.seenPosts.add(submission.id)
         
-        if currentSubmission.author is None: # Round has been deleted
+        if currentSubmission.author is None or currentSubmission.banned_by is not None: # Round has been deleted
             Logger.log("Round deleted, going back to listening for rounds")
             state.setState({ "unsolved": False })
             return
