@@ -18,6 +18,7 @@ class State:
     instance = None
     seenComments = None
     seenPosts = None
+    commentedRoundIds = None # Dict keys = round ids, values = comment objects
 
     def __init__(self):
         if not os.path.isdir("data"):
@@ -32,6 +33,7 @@ class State:
             self.instance = ImportExportHelper.importData(self)
             self.seenComments = set()
             self.seenPosts = set()
+            self.commentedRoundIds = {}
 
     def __getattr__(self, name):
         if name == "reddit":

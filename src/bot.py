@@ -21,6 +21,7 @@ def listenForComments(state):
             if not submission.is_self:
                 reply = submission.reply(DUPLICATE_ROUND_REPLY.format(roundUrl = currentSubmission.permalink))
                 reply.mod.distinguish()
+                state.commentedRoundIds[submission.id] = reply
             state.seenPosts.add(submission.id)
         
         if currentSubmission.author is None or currentSubmission.banned_by is not None: # Round has been deleted
@@ -90,6 +91,10 @@ def onNewRoundPosted(state, submission):
 
     newRoundReply = submission.reply(NEW_ROUND_COMMENT.format(hostName = submission.author.name, subredditName = state.config["subredditName"]))
     newRoundReply.mod.distinguish()
+
+    if submission.id in state.commentedRoundIds:
+        state.commentedRoundIds[submission.id].delete()
+    state.commentedRoundIds = {}
 
     newState = {
             "unsolved": True,
