@@ -19,6 +19,7 @@ def initialValuesFromSubreddit(subreddit, botName):
 
             if not initialValues["unsolved"]:
                 initialValues["roundWonTime"] = getRoundWonTime(submission, botName)
+                initialValues["roundNumber"] += 1 # Look for the NEXT round if it's over
 
             break
 
