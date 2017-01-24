@@ -27,6 +27,7 @@ def initialValuesFromSubreddit(subreddit, botName):
 
 
 def getRoundWonTime(submission, botName):
+    submission.comments.replace_more(limit = 0)
     for comment in submission.comments.list():
         if comment.author.name == botName and comment.body.strip().startswith("Congratulations"):
             return comment.created_utc
