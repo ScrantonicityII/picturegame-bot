@@ -16,7 +16,8 @@ def listenForComments(state):
 
         # Check for stray posts (ignore mod posts)
         for submission in state.subreddit.new(limit=5):
-            if submission.id == state.roundId or submission.id in state.seenPosts:
+            print(submission.created_utc, currentSubmission.created_utc)
+            if submission.created_utc <= currentSubmission.created_utc or submission.id in state.seenPosts:
                 break
             if not submission.is_self:
                 reply = submission.reply(DUPLICATE_ROUND_REPLY.format(roundUrl = currentSubmission.permalink))
