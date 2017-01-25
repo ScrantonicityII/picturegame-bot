@@ -16,7 +16,6 @@ def listenForComments(state):
 
         # Check for stray posts (ignore mod posts)
         for submission in state.subreddit.new(limit=5):
-            print(submission.created_utc, currentSubmission.created_utc)
             if submission.created_utc <= currentSubmission.created_utc or submission.id in state.seenPosts:
                 break
             if not submission.is_self:
