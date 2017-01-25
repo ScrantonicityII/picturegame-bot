@@ -26,6 +26,8 @@ def listenForComments(state):
         
         if currentSubmission.author is None or currentSubmission.banned_by is not None: # Round has been deleted
             Logger.log("Round deleted, going back to listening for rounds")
+
+            currentSubmission.flair.select(None)
             state.setState({ "unsolved": False })
             return
 
