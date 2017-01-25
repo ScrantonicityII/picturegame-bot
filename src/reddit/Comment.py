@@ -5,6 +5,7 @@ def validate(state, comment):
     - contains the string `+correct`
     - is posted by either the current host or a mod
     - is not a top-level comment
+    - the receiving comment has not been deleted or removed
     - the person being +corrected is not any of the bots or the current host
     - the person giving the +correct is not the same person receiving it, unless that person is a mod
     '''
@@ -15,13 +16,14 @@ def validate(state, comment):
         return False # ignore deleted comments
 
     correcter = comment.author.name
-    receiver = receivingComment.author.name
+    receiver = receivingComment.author
 
     return CORRECT_PATTERN.search(comment.body) and \
             correcter in state.mods.union({state.currentHost}) and \
             not comment.is_root and \
-            receiver not in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}) and \
-            (receiver != correcter or correcter in state.mods)
+            receivingComment.banned_by is None and receiver is not None and \
+            receiver.name not in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}) and \
+            (receiver.name != correcter or correcter in state.mods)
 
 
 def postSticky(state, winningComment):
