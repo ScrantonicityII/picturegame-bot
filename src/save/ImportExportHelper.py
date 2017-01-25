@@ -11,7 +11,8 @@ def initialValuesFromSubreddit(subreddit, botName):
 
     initialValues = {}
     for submission in subreddit.new(limit=5):
-        if TITLE_PATTERN.match(submission.title):
+        if submission.author is not None and submission.banned_by is None and \
+                TITLE_PATTERN.match(submission.title):
             initialValues["roundNumber"] = int(submission.title.split()[1].strip(']'))
             initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
@@ -29,7 +30,7 @@ def initialValuesFromSubreddit(subreddit, botName):
 def getRoundWonTime(submission, botName):
     submission.comments.replace_more(limit = 0)
     for comment in submission.comments.list():
-        if comment.author.name == botName and comment.body.strip().startswith("Congratulations"):
+        if comment.author is not None and comment.author.name == botName and comment.body.strip().startswith("Congratulations"):
             return comment.created_utc
 
 
@@ -50,10 +51,15 @@ def importData(state):
         data = json.loads(dataFile.read())
 
     currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
-    data["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
 
-    if not data["unsolved"]: # make sure we know when the previous round was won
-        data["roundWonTime"] = getRoundWonTime(currentRoundSubmission, state.config["botName"])
+    if currentRoundSubmission.author is None or currentRoundSubmission.banned_by is not None:
+        # If the ongoing round has been deleted then immediately start listening for new ones
+        data["unsolved"] = False
+        data["roundWonTime"] = currentRoundSubmission.created_utc
+    else:
+        data["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
+        if not data["unsolved"]: # make sure we know when the previous round was won
+            data["roundWonTime"] = getRoundWonTime(currentRoundSubmission, state.config["botName"])
 
     exportData(data)
     return data
