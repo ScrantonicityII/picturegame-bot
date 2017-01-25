@@ -48,7 +48,7 @@ ROUND_OVER_STICKY = '''#Congratulations to {winnerName} on winning this round!
 
 The correct answer was:
 
-[{roundAnswer}](/spoiler)
+{spoileredAnswer}
 
 [Go to winning comment]({commentLink})'''
 

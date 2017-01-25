@@ -31,7 +31,10 @@ def postSticky(state, winningComment):
     roundSubmission = winningComment.submission
     commentLink = COMMENT_URL.format(postId = state.roundId, commentId = winningComment.id)
     roundAnswer = winningComment.body
-    stickyReply = roundSubmission.reply(ROUND_OVER_STICKY.format(winnerName = roundWinner, roundAnswer = roundAnswer, commentLink = commentLink))
+
+    spoileredAnswer = "\n\n".join(["[{}](/spoiler)".format(part) for part in roundAnswer.split("\n\n")])
+
+    stickyReply = roundSubmission.reply(ROUND_OVER_STICKY.format(winnerName = roundWinner, spoileredAnswer = spoileredAnswer, commentLink = commentLink))
     stickyReply.mod.distinguish(sticky = not roundHasSticky(roundSubmission))
 
 
