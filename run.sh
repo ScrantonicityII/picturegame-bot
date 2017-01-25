@@ -1,2 +1,2 @@
 #!/bin/bash
-src/bot.py
+src/bot.py 2> data/error.txt
