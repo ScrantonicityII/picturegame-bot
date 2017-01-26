@@ -7,7 +7,7 @@ def validate(state, comment):
     if not CORRECT_PATTERN.search(comment.body):
         return False
 
-    if not comment.is_root:
+    if comment.is_root:
         return False
 
     if comment.author is None or comment.banned_by is not None:
@@ -24,7 +24,7 @@ def validate(state, comment):
     if receiver in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}):
         return False
 
-    if state.currentHost == "Provium" and state.roundWinner["wins"] == 100 and receiver == correcter:
+    if state.currentHost == "Provium" and "roundWinner" in state.instance and state.roundWinner["wins"] == 100 and receiver == correcter:
         return True
 
     return correcter in state.mods.union({state.currentHost}) and \
