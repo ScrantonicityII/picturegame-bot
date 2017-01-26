@@ -59,18 +59,18 @@ def onRoundOver(state, comment):
     Post.setFlair(comment.submission, OVER_FLAIR)
 
     state.subreddit.contributor.remove(state.currentHost)
+    state.subreddit.contributor.add(roundWinner.name)
+    Mail.archiveModMail(state)
+
+    roundWinner.message(WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = state.config["subredditName"]))
+
+    Comment.postSticky(state, winningComment)
 
     state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
     state.seenPosts = set()
 
-    state.subreddit.contributor.add(roundWinner.name)
-    Mail.archiveModMail(state)
-
-    roundWinner.message(WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber, subredditName = state.config["subredditName"]))
     User.setFlair(state, roundWinner, winningComment)
-
-    Comment.postSticky(state, winningComment)
 
 
 def listenForPosts(state):
