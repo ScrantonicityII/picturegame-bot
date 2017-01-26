@@ -12,8 +12,9 @@ def initialValuesFromSubreddit(subreddit, botName):
     initialValues = {}
     for submission in subreddit.new(limit=5):
         if submission.author is not None and submission.banned_by is None and \
+                submission.link_flair_text is not None and \
                 TITLE_PATTERN.match(submission.title):
-            initialValues["roundNumber"] = int(submission.title.split()[1].strip(']'))
+            initialValues["roundNumber"] = int(submission.title[submission.title.index(' ') + 1 : submission.title.index(']')])
             initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
             initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
