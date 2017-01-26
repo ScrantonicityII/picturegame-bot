@@ -1,29 +1,34 @@
 from const import *
 
 def validate(state, comment):
-    '''Check that the comment meets the following conditions:
-    - contains the string `+correct`
-    - is posted by either the current host or a mod
-    - is not a top-level comment
-    - the receiving comment has not been deleted or removed
-    - the person being +corrected is not any of the bots or the current host
-    - the person giving the +correct is not the same person receiving it, unless that person is a mod
-    '''
+    '''Check that a comment is a valid +correct'''
+
+    # Do some easy checks before we query Reddit
+    if not CORRECT_PATTERN.search(comment.body):
+        return False
+
+    if not comment.is_root:
+        return False
+
+    if comment.author is None or comment.banned_by is not None:
+        return False
 
     receivingComment = comment.parent()
 
-    if comment.author is None or receivingComment.author is None:
-        return False # ignore deleted comments
+    if receivingComment.author is None or receivingComment.banned_by is not None:
+        return False
 
     correcter = comment.author.name
-    receiver = receivingComment.author
+    receiver = receivingComment.author.name
 
-    return CORRECT_PATTERN.search(comment.body) and \
-            correcter in state.mods.union({state.currentHost}) and \
-            not comment.is_root and \
-            receivingComment.banned_by is None and receiver is not None and \
-            receiver.name not in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}) and \
-            (receiver.name != correcter or correcter in state.mods)
+    if receiver in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}):
+        return False
+
+    if state.currentHost == "Provium" and state.roundWinner["wins"] == 100 and receiver == correcter:
+        return True
+
+    return correcter in state.mods.union({state.currentHost}) and \
+            (receiver != correcter or correcter in state.mods)
 
 
 def postSticky(state, winningComment):
