@@ -14,10 +14,12 @@ def validate(state, submission):
     - was posted after the previous round was won
     - is not a self post (rounds are always links, self posts must be mod posts)
     - is not locked
+    - is not deleted/removed
     '''
     return submission.created_utc > state.roundWonTime and \
             not submission.is_self and \
-            not submission.locked
+            not submission.locked and \
+            submission.author is not None and submission.banned_by is None
 
 
 def rejectIfInvalid(state, submission):
