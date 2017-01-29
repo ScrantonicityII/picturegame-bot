@@ -48,8 +48,6 @@ def onRoundOver(state, comment):
     replyComment = actionWithRetry(winningComment.reply, PLUSCORRECT_REPLY)
     actionWithRetry(replyComment.mod.distinguish)
 
-    actionWithRetry(Post.setFlair, comment.submission, OVER_FLAIR)
-
     actionWithRetry(state.subreddit.contributor.remove, state.currentHost)
     actionWithRetry(state.subreddit.contributor.add, roundWinner.name)
     actionWithRetry(Mail.archiveModMail, state)
@@ -63,6 +61,7 @@ def onRoundOver(state, comment):
     state.seenPosts = set()
 
     actionWithRetry(User.setFlair, state, roundWinner, winningComment)
+    actionWithRetry(Post.setFlair, comment.submission, OVER_FLAIR)
 
 
 def listenForPosts(state):
