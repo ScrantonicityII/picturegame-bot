@@ -4,6 +4,7 @@ import praw
 from const import *
 from . import Logger
 from reddit import Wiki
+from actions.Retry import actionWithRetry
 
 
 def initialValuesFromSubreddit(subreddit, botName):
@@ -20,7 +21,7 @@ def initialValuesFromSubreddit(subreddit, botName):
             initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
 
             if not initialValues["unsolved"]:
-                initialValues["roundWonTime"] = getRoundWonTime(submission, botName)
+                initialValues["roundWonTime"] = actionWithRetry(getRoundWonTime, submission, botName)
                 initialValues["roundNumber"] += 1 # Look for the NEXT round if it's over
 
             break
@@ -35,13 +36,27 @@ def getRoundWonTime(submission, botName):
             return comment.created_utc
 
 
+def getRoundStatus(submission, botName):
+    data = {}
+    if submission.author is None or submission.banned_by is not None:
+        # If the ongoing round has been deleted then immediately start listening for new ones
+        data["unsolved"] = False
+        data["roundWonTime"] = submission.created_utc
+    else:
+        data["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
+        if not data["unsolved"]: # make sure we know when the previous round was won
+            data["roundWonTime"] = actionWithRetry(getRoundWonTime, submission, botName)
+
+    return data
+
+
 def importData(state):
     '''Import subreddit status from file, or generate new'''
 
     if not os.path.isfile("data/data.json"):
         Logger.log("Generating new data.json")
 
-        initialValues = initialValuesFromSubreddit(state.subreddit, state.config["botName"])
+        initialValues = actionWithRetry(initialValuesFromSubreddit, state.subreddit, state.config["botName"])
         exportData(initialValues)
 
         return initialValues
@@ -53,14 +68,9 @@ def importData(state):
 
     currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
 
-    if currentRoundSubmission.author is None or currentRoundSubmission.banned_by is not None:
-        # If the ongoing round has been deleted then immediately start listening for new ones
-        data["unsolved"] = False
-        data["roundWonTime"] = currentRoundSubmission.created_utc
-    else:
-        data["unsolved"] = currentRoundSubmission.link_flair_text == UNSOLVED_FLAIR
-        if not data["unsolved"]: # make sure we know when the previous round was won
-            data["roundWonTime"] = getRoundWonTime(currentRoundSubmission, state.config["botName"])
+    roundStatus = actionWithRetry(getRoundStatus, currentRoundSubmission, state.config["botName"])
+    data["unsolved"] = roundStatus["unsolved"]
+    data["roundWonTime"] = roundStatus.get("roundWonTime", None)
 
     exportData(data)
     return data

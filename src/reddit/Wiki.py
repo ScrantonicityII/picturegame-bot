@@ -1,5 +1,6 @@
 import json
 from const import *
+from actions.Retry import actionWithRetry
 
 
 def scrapeLeaderboard(subreddit):
@@ -31,4 +32,4 @@ def exportLeaderboard(subreddit, leaderboard):
                 leaderboard[name]["wins"]
                 )
 
-    subreddit.wiki["leaderboard"].edit(outputString)
+    actionWithRetry(subreddit.wiki["leaderboard"].edit, outputString)

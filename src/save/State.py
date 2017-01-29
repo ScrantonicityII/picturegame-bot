@@ -6,6 +6,7 @@ import praw
 from const import *
 from . import Logger
 from reddit import Wiki
+from actions.Retry import actionWithRetry
 
 class State:
     '''Singleton State object - initialised once at the start of the program.
@@ -29,11 +30,14 @@ class State:
             self.config = ImportExportHelper.loadOrGenerateConfig()
             self.reddit = praw.Reddit(self.config["scriptName"])
             self.subreddit = self.reddit.subreddit(self.config["subredditName"])
-            self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
+            actionWithRetry(self.updateMods)
             self.instance = ImportExportHelper.importData(self)
             self.seenComments = set()
             self.seenPosts = set()
             self.commentedRoundIds = {}
+
+    def updateMods(self):
+        self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
 
     def __getattr__(self, name):
         if name == "reddit":
@@ -45,7 +49,7 @@ class State:
         if name == "mods":
             return self.mods
         if name == "leaderboard":
-            return Wiki.scrapeLeaderboard(self.subreddit)
+            return actionWithRetry(Wiki.scrapeLeaderboard, self.subreddit)
         return self.instance[name]
 
     def setState(self, values):
@@ -56,6 +60,7 @@ class State:
     def awardWin(self, username, comment):
         leaderboard = self.leaderboard
         roundNumber = self.roundNumber
+        roundWonTime = actionWithRetry(lambda c: c.created_utc, comment)
 
         numWins = 0
         rounds = []
@@ -76,7 +81,7 @@ class State:
             "roundNumber": roundNumber + 1,
             "currentHost": username,
             "unsolved": False,
-            "roundWonTime": comment.created_utc,
+            "roundWonTime": roundWonTime,
             "roundWinner": {
                 "wins": numWins,
                 "rounds": rounds
