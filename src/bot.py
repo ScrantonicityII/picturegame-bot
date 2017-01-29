@@ -20,6 +20,9 @@ def listenForComments(state):
         if actionWithRetry(Post.checkDeleted, state, currentSubmission):
             return
 
+        if actionWithRetry(Post.checkAbandoned, state, currentSubmission):
+            return
+
         currentSubmission.comments.replace_more(limit = 0)
         commentList = currentSubmission.comments.list()
         sortedComments = sorted(commentList, key = lambda comment: comment.created_utc)

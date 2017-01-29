@@ -1,5 +1,5 @@
 import re
-from const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, DUPLICATE_ROUND_REPLY
+from const import *
 from actions.Retry import actionWithRetry
 from save import Logger
 
@@ -80,3 +80,16 @@ def checkDeleted(state, submission):
         return True
 
     return False
+
+
+def checkAbandoned(state, submission):
+    '''Check if the current round has been flaired abandoned or terminated, or manually flaired over
+    Bump up the round number and return to listening for rounds if it has'''
+
+   if submission.link_flair_text in ABANDONED_FLAIRS:
+       Logger.log("Round abandoned, listening for next round")
+
+       state.setState({ "unsolved": False, "roundNumber": state.roundNumber + 1 })
+       return True
+
+   return False
