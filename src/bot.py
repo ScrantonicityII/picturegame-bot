@@ -74,6 +74,8 @@ def listenForPosts(state):
 
 
 def onNewRoundPosted(state, submission):
+    actionWithRetry(state.updateMods)
+
     postAuthor = actionWithRetry(lambda s: s.author.name, submission)
     postId = actionWithRetry(lambda s: s.id, submission)
 
