@@ -86,10 +86,10 @@ def checkAbandoned(state, submission):
     '''Check if the current round has been flaired abandoned or terminated, or manually flaired over
     Bump up the round number and return to listening for rounds if it has'''
 
-   if submission.link_flair_text in ABANDONED_FLAIRS:
+    if submission.link_flair_text in ABANDONED_FLAIRS:
        Logger.log("Round abandoned, listening for next round")
 
        state.setState({ "unsolved": False, "roundNumber": state.roundNumber + 1 })
        return True
 
-   return False
+    return False
