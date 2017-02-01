@@ -99,6 +99,7 @@ def loadOrGenerateConfig():
         config["scriptName"] = input("Enter script name (the same as in praw.ini): ")
         config["botName"] = input("Enter the reddit username of the bot (case sensitive): ")
         config["subredditName"] = input("Enter the name of the subreddit (case sensitive): ")
+        config["ownerName"] = input("Enter the reddit username of the person I should message when there is a new version: ")
 
         with open("data/config.json", 'w') as configFile:
             configFile.write(json.dumps(config))

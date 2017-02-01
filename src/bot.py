@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 from time import sleep
+import urllib.request
+from threading import Thread
 
 from save.State import State
 from reddit import Comment, Post, Mail, User
@@ -106,10 +108,29 @@ def onNewRoundPosted(state, submission):
     return True
 
 
+def fetchLatestVersion():
+    webResource = urllib.request.urlopen(VERSION_URL)
+    return str(webResource.read(), "utf-8").strip()
+
+
+def checkVersion(state):
+    while True:
+        latestVersion = actionWithRetry(fetchLatestVersion)
+        if latestVersion != state.seenVersion:
+            owner = state.reddit.redditor(state.config["ownerName"])
+            actionWithRetry(owner.message, NEW_VERSION_SUBJECT, NEW_VERSION_PM)
+            state.seenVersion = latestVersion
+
+        sleep(86400) # Just check every day
+
+
 def main():
     print("PictureGame Bot by Provium")
     print("Press ctrl+c to exit")
     state = State()
+
+    versionThread = Thread(target = checkVersion, args = (state,))
+    versionThread.start()
 
     try:
         while True:

@@ -20,6 +20,7 @@ class State:
     seenComments = None
     seenPosts = None
     commentedRoundIds = None # Dict keys = round ids, values = comment objects
+    seenVersion = ""
 
     def __init__(self):
         if not os.path.isdir("data"):
@@ -32,6 +33,7 @@ class State:
             self.subreddit = self.reddit.subreddit(self.config["subredditName"])
             actionWithRetry(self.updateMods)
             self.instance = ImportExportHelper.importData(self)
+            self.updateVersion()
             self.seenComments = set()
             self.seenPosts = set()
             self.commentedRoundIds = {}
@@ -89,3 +91,7 @@ class State:
             })
 
         ImportExportHelper.exportLeaderboard(self.subreddit, leaderboard)
+
+    def updateVersion(self):
+        with open("VERSION") as versionFile:
+            self.seenVersion = versionFile.read().strip()
