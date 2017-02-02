@@ -35,6 +35,9 @@ def getRoundWonTime(submission, botName):
         if comment.author is not None and comment.author.name == botName and comment.body.strip().startswith("Congratulations"):
             return comment.created_utc
 
+    # If we can't find anything (e.g. if it's abandoned) just use the submitted time of the post
+    return submission.created_utc
+
 
 def getRoundStatus(submission, botName):
     data = {}

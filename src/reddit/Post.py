@@ -17,10 +17,12 @@ def validate(state, submission):
     - is not a self post (rounds are always links, self posts must be mod posts)
     - is not locked
     - is not deleted/removed
+    - is not already flaired
     '''
     return submission.created_utc > state.roundWonTime and \
             not submission.is_self and \
             not submission.locked and \
+            submission.link_flair_text is None and \
             submission.author is not None and submission.banned_by is None
 
 
@@ -87,9 +89,13 @@ def checkAbandoned(state, submission):
     Bump up the round number and return to listening for rounds if it has'''
 
     if submission.link_flair_text in ABANDONED_FLAIRS:
-       Logger.log("Round abandoned, listening for next round")
+        Logger.log("Round abandoned, cleaning up")
 
-       state.setState({ "unsolved": False, "roundNumber": state.roundNumber + 1 })
-       return True
+        actionWithRetry(state.subreddit.contributor.remove, state.currentHost)
+        actionWithRetry(deleteExtraPosts, state, submission)
+
+        submittedTime = actionWithRetry(lambda s: s.created_utc, submission)
+        state.setState({ "unsolved": False, "roundNumber": state.roundNumber + 1, "roundWonTime": submittedTime })
+        return True
 
     return False
