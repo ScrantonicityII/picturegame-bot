@@ -11,6 +11,6 @@ def actionWithRetry(action, *args):
             result = action(*args)
             return result
         except Exception as e:
-            Logger.log("Action failed: {}, retrying in 10 seconds...".format(action.__name__))
+            Logger.log("Action {} failed with error message: {}, retrying in 10 seconds...".format(action.__name__, e))
             sleep(10)
             continue
