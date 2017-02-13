@@ -3,6 +3,7 @@
 from time import sleep
 import urllib.request
 from threading import Thread
+import praw
 
 from save.State import State
 from reddit import Comment, Post, Mail, User
@@ -13,6 +14,8 @@ from actions.Retry import actionWithRetry
 
 def listenForComments(state):
     Logger.log("Listening for +correct on round {}...".format(state.roundNumber))
+
+    forestState = {}
 
     while True:
         currentSubmission = state.reddit.submission(id = state.roundId)
@@ -25,14 +28,31 @@ def listenForComments(state):
         if actionWithRetry(Post.checkAbandoned, state, currentSubmission):
             return
 
-        currentSubmission.comments.replace_more(limit = 0)
-        commentList = currentSubmission.comments.list()
-        sortedComments = sorted(commentList, key = lambda comment: comment.created_utc)
-        for comment in sortedComments:
-            if comment.id in state.seenComments:
-                continue
+        # Can use `limit = None` to unpack the entire tree in one line, but this is very inefficient in large threads
+        leftovers = currentSubmission.comments.replace_more(limit = 0)
 
-            state.seenComments.add(comment.id)
+        commentSet = {comment for comment in currentSubmission.comments.list() if comment.id not in state.seenComments}
+        state.seenComments = state.seenComments.union({comment.id for comment in commentSet})
+
+        # Traverse the `MoreComments` trees, but ignore any that have not had any more comments since the last update
+        # Unfortunately this method cannot open `continue this thread` handles, so comments beyond a depth of 10 will not be seen by the bot
+        # This still allows reading of unlimited top-level comments, which is the main use-case for PG, and maintains decent performance
+        while len(leftovers):
+            commentTree = leftovers.pop()
+            if forestState.get(commentTree.id, -1) < commentTree.count:
+                if commentTree.id != '_':
+                    forestState[commentTree.id] = commentTree.count
+
+                for comment in commentTree.comments():
+                    if type(comment) == praw.models.reddit.comment.Comment:
+                        if comment.id not in state.seenComments:
+                            state.seenComments.add(comment.id)
+                            commentSet.add(comment)
+                    else:
+                        leftovers.append(comment)
+
+        sortedComments = sorted(commentSet, key = lambda comment: comment.created_utc)
+        for comment in sortedComments:
             if actionWithRetry(Comment.validate, state, comment):
                 actionWithRetry(onRoundOver, state, comment)
                 return
