@@ -24,9 +24,6 @@ def validate(state, comment):
     if receiver in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}):
         return False
 
-    if state.currentHost == "Provium" and "roundWinner" in state.instance and state.roundWinner["wins"] == 100 and receiver == correcter:
-        return True
-
     return correcter in state.mods.union({state.currentHost}) and \
             (receiver != correcter or correcter in state.mods)
 
