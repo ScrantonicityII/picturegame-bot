@@ -1,4 +1,6 @@
 import json
+import re
+
 from const import *
 from actions.Retry import actionWithRetry
 
@@ -8,7 +10,12 @@ def scrapeLeaderboard(subreddit):
     leaderboard = {}
     for line in wikiPageData:
         rank, name, rawRounds, winCount = line.split(" | ")
-        rounds = [int(roundNum) for roundNum in rawRounds.split(", ")]
+
+        # Convoluted unpacking of round numbers
+        # Instead of splitting on a delimiter, group by maximal "words" of letters and numbers,
+        # and then remove anything that's not a number
+        rounds = [int(re.sub("\D", "", rawRound)) for rawRound in re.findall("[\w\d]+", rawRounds)]
+
         leaderboard[name] = {
                 "wins": len(rounds),
                 "rounds": rounds
