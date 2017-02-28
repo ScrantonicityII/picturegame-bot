@@ -10,3 +10,4 @@ def archiveModMail(state):
         if conv["subject"] == "you are an approved submitter" and \
                 len(conv["authors"]) == 1 and conv["authors"][0]["name"] == state.config["botName"]:
             state.reddit.post(ARCHIVE_URL.format(convId))
+            return
