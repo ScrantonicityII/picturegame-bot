@@ -42,14 +42,6 @@ class State:
         self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
 
     def __getattr__(self, name):
-        if name == "reddit":
-            return self.reddit
-        if name == "subreddit":
-            return self.subreddit
-        if name == "config":
-            return self.config
-        if name == "mods":
-            return self.mods
         if name == "leaderboard":
             return actionWithRetry(Wiki.scrapeLeaderboard, self.subreddit)
         return self.instance[name]
