@@ -21,6 +21,7 @@ class State:
     seenPosts = None
     commentedRoundIds = None # Dict keys = round ids, values = comment objects
     seenVersion = ""
+    apiSessionToken = ""
 
     def __init__(self):
         if not os.path.isdir("data"):

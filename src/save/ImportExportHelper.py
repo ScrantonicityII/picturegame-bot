@@ -1,6 +1,8 @@
 import json
 import os
 import praw
+import getpass
+
 from const import *
 from . import Logger
 from reddit import Wiki
@@ -103,6 +105,8 @@ def loadOrGenerateConfig():
         config["botName"] = input("Enter the reddit username of the bot (case sensitive): ")
         config["subredditName"] = input("Enter the name of the subreddit (case sensitive): ")
         config["ownerName"] = input("Enter the reddit username of the person I should message when there is a new version: ")
+        config["username"] = input("picturegame-api username: ")
+        config["password"] = getpass.getpass("picturegame-api password: ")
 
         with open("data/config.json", 'w') as configFile:
             configFile.write(json.dumps(config))

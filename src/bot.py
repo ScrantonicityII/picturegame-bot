@@ -10,6 +10,7 @@ from reddit import Comment, Post, Mail, User
 from const import *
 from save import Logger
 from actions.Retry import actionWithRetry 
+from api import ApiConnector
 
 
 def listenForComments(state):
@@ -65,6 +66,8 @@ def onRoundOver(state, comment):
     roundWinner = winningComment.author
     Logger.log("Round {} won by {}".format(state.roundNumber, roundWinner.name))
 
+    actionWithRetry(ApiConnector.tryRequest, state, ApiConnector.put, state.roundNumber, winningComment)
+
     actionWithRetry(Post.deleteExtraPosts, state, comment.submission) # delete extra posts before anything else so we don't accidentally delete the next round
 
     replyComment = actionWithRetry(winningComment.reply, PLUSCORRECT_REPLY)
@@ -97,6 +100,8 @@ def listenForPosts(state):
 
 def onNewRoundPosted(state, submission):
     actionWithRetry(state.updateMods)
+
+    actionWithRetry(ApiConnector.tryRequest, state, ApiConnector.post, state.roundNumber, submission)
 
     postAuthor = actionWithRetry(lambda s: s.author.name, submission)
     postId = actionWithRetry(lambda s: s.id, submission)
@@ -148,6 +153,7 @@ def main():
     print("PictureGame Bot by Provium")
     print("Press ctrl+c to exit")
     state = State()
+    ApiConnector.login(state)
 
     versionThread = Thread(target = checkVersion, args = (state,))
     versionThread.start()
