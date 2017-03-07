@@ -41,7 +41,7 @@ WINNER_PM = '''
     Please remember that your title must start with "[Round {roundNum}]".
 
 ---
->[Join the Discord chat](http://discord.gg/013eeoM1NYuYmJH$) and discuss your round live with the PictureGame community!
+>[Join the Discord chat](https://discord.gg/D2t9fN2) and discuss your round live with the PictureGame community!
 
 >[Submit a new Round](http://www.reddit.com/r/{subredditName}/submit?title=[Round%20{roundNum}])
 
@@ -64,7 +64,7 @@ Please re-post your round with the following title:
 
 NEW_ROUND_COMMENT = '''#*Chat*:
 
-Join the official [{subredditName} Discord](http://discord.gg/013eeoM1NYuYmJHpe) chat to discuss this and future rounds!
+Join the official [{subredditName} Discord](https://discord.gg/D2t9fN2) chat to discuss this and future rounds!
 
 Mobile apps also available: [Apple](https://itunes.apple.com/us/app/discord-chat-for-gamers/id985746746?mt=8), [Android](https://play.google.com/store/apps/details?id=com.discord&hl=en)
 
