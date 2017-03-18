@@ -3,6 +3,7 @@ import os
 
 from . import ImportExportHelper
 import praw
+import config
 from const import *
 from . import Logger
 from reddit import Wiki
@@ -15,7 +16,6 @@ class State:
     reddit = None
     subreddit = None
     mods = None
-    config = None
     instance = None
     seenComments = None
     seenPosts = None
@@ -27,11 +27,10 @@ class State:
         if not os.path.isdir("data"):
             os.mkdir("data")
 
-        if not State.config:
+        if not State.instance:
             Logger.log("Initialising State", 'w')
-            self.config = ImportExportHelper.loadOrGenerateConfig()
-            self.reddit = praw.Reddit(self.config["scriptName"])
-            self.subreddit = self.reddit.subreddit(self.config["subredditName"])
+            self.reddit = praw.Reddit(config.getKey("scriptName"))
+            self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
             actionWithRetry(self.updateMods)
             self.instance = ImportExportHelper.importData(self)
             self.updateVersion()

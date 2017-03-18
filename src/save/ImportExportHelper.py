@@ -3,6 +3,7 @@ import os
 import praw
 import getpass
 
+import config
 from const import *
 from . import Logger
 from reddit import Wiki
@@ -61,7 +62,7 @@ def importData(state):
     if not os.path.isfile("data/data.json"):
         Logger.log("Generating new data.json")
 
-        initialValues = actionWithRetry(initialValuesFromSubreddit, state.subreddit, state.config["botName"])
+        initialValues = actionWithRetry(initialValuesFromSubreddit, state.subreddit, config.getKey("botName"))
         exportData(initialValues)
 
         return initialValues
@@ -73,7 +74,7 @@ def importData(state):
 
     currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
 
-    roundStatus = actionWithRetry(getRoundStatus, currentRoundSubmission, state.config["botName"])
+    roundStatus = actionWithRetry(getRoundStatus, currentRoundSubmission, config.getKey("botName"))
     data["unsolved"] = roundStatus["unsolved"]
     data["roundWonTime"] = roundStatus.get("roundWonTime", None)
 
@@ -97,22 +98,9 @@ def exportLeaderboard(subreddit, leaderboard):
 
 
 def loadOrGenerateConfig():
-    if not os.path.isfile("data/config.json"):
+    if not os.path.isfile(config.FileName):
         Logger.log("First time use, generating config.json")
-
-        config = {}
-        config["scriptName"] = input("Enter script name (the same as in praw.ini): ")
-        config["botName"] = input("Enter the reddit username of the bot (case sensitive): ")
-        config["subredditName"] = input("Enter the name of the subreddit (case sensitive): ")
-        config["ownerName"] = input("Enter the reddit username of the person I should message when there is a new version: ")
-        # config["username"] = input("picturegame-api username: ")
-        # config["password"] = getpass.getpass("picturegame-api password: ")
-
-        with open("data/config.json", 'w') as configFile:
-            configFile.write(json.dumps(config))
-
-        return config
+        config.generateConfig()
 
     Logger.log("Loading config.json")
-    with open("data/config.json") as configFile:
-        return json.loads(configFile.read())
+    config.loadConfig()

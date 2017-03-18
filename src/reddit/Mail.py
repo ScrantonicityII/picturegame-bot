@@ -1,5 +1,6 @@
 from time import sleep
 
+import config
 from const import *
 
 def archiveModMail(state):
@@ -8,6 +9,6 @@ def archiveModMail(state):
     for convId in conversations:
         conv = conversations[convId]
         if conv["subject"] == "you are an approved submitter" and \
-                len(conv["authors"]) == 1 and conv["authors"][0]["name"] == state.config["botName"]:
+                len(conv["authors"]) == 1 and conv["authors"][0]["name"] == config.getKey("botName"):
             state.reddit.post(ARCHIVE_URL.format(convId))
             return

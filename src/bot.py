@@ -6,7 +6,9 @@ from threading import Thread
 import praw
 
 from save.State import State
+from save.ImportExportHelper import loadOrGenerateConfig
 from reddit import Comment, Post, Mail, User
+import config
 from const import *
 from save import Logger
 from actions.Retry import actionWithRetry 
@@ -77,7 +79,7 @@ def onRoundOver(state, comment):
     actionWithRetry(state.subreddit.contributor.add, roundWinner.name)
     actionWithRetry(Mail.archiveModMail, state)
 
-    actionWithRetry(roundWinner.message, WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = state.config["subredditName"]))
+    actionWithRetry(roundWinner.message, WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
 
     actionWithRetry(Comment.postSticky, state, winningComment)
 
@@ -114,7 +116,7 @@ def onNewRoundPosted(state, submission):
     if postAuthor != state.currentHost: # de-perm the original +CP if someone else took over
         actionWithRetry(state.subreddit.contributor.remove, state.currentHost)
 
-    newRoundReply = actionWithRetry(submission.reply, NEW_ROUND_COMMENT.format(hostName = postAuthor, subredditName = state.config["subredditName"]))
+    newRoundReply = actionWithRetry(submission.reply, NEW_ROUND_COMMENT.format(hostName = postAuthor, subredditName = config.getKey("subredditName")))
     newRoundReply.mod.distinguish()
 
     if postId in state.commentedRoundIds:
@@ -142,7 +144,7 @@ def checkVersion(state):
     while True:
         latestVersion = actionWithRetry(fetchLatestVersion)
         if latestVersion != state.seenVersion:
-            owner = state.reddit.redditor(state.config["ownerName"])
+            owner = state.reddit.redditor(config.getKey("ownerName"))
             actionWithRetry(owner.message, NEW_VERSION_SUBJECT, NEW_VERSION_PM)
             state.seenVersion = latestVersion
 
@@ -152,6 +154,8 @@ def checkVersion(state):
 def main():
     print("PictureGame Bot by Provium")
     print("Press ctrl+c to exit")
+    
+    loadOrGenerateConfig()
     state = State()
     # ApiConnector.login(state)
 

@@ -1,3 +1,4 @@
+import config
 from const import *
 
 def validate(state, comment):
@@ -21,7 +22,7 @@ def validate(state, comment):
     correcter = comment.author.name
     receiver = receivingComment.author.name
 
-    if receiver in DISALLOWED_NAMES.union({state.currentHost, state.config["botName"]}):
+    if receiver in DISALLOWED_NAMES.union({state.currentHost, config.getKey("botName")}):
         return False
 
     return correcter in state.mods.union({state.currentHost}) and \

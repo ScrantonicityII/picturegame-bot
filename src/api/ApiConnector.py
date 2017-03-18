@@ -1,6 +1,7 @@
 import json
 import requests
 
+import config
 from const import PG_API_URL
 from save import Logger
 
@@ -14,7 +15,7 @@ def tryRequest(state, method, *args):
 
 
 def login(state):
-    username, password = state.config["username"], state.config["password"]
+    username, password = config.getKey("username"), config.getKey("password")
     
     request = requests.post(PG_API_URL + "/login", 
             data = json.dumps({ "username": username, "password": password }),

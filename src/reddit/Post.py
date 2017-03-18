@@ -1,4 +1,5 @@
 import re
+import config
 from const import *
 from actions.Retry import actionWithRetry
 from save import Logger
@@ -36,7 +37,7 @@ def rejectIfInvalid(state, submission):
         titleRemainder = TITLE_CORRECTION_PATTERN.sub("", roundTitle)
         correctTitle = "[Round {}] {}".format(state.roundNumber, titleRemainder)
 
-        rejectionReply = actionWithRetry(submission.reply, REJECTION_COMMENT.format(correctTitle = correctTitle, subredditName = state.config["subredditName"]))
+        rejectionReply = actionWithRetry(submission.reply, REJECTION_COMMENT.format(correctTitle = correctTitle, subredditName = config.getKey("subredditName")))
         rejectionReply.mod.distinguish(sticky = True)
 
         actionWithRetry(submission.mod.lock)
