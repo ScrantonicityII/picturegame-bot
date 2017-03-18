@@ -1,5 +1,6 @@
 from prawcore import exceptions
 from time import sleep
+import traceback
 
 from save import Logger
 
@@ -7,9 +8,14 @@ def actionWithRetry(action, *args):
     '''Perform the given action. If an exception is raised, retry every ten seconds
     Return the return value of the action, if any'''
 
+    failCount = 0
     while True:
         try:
             result = action(*args)
+
+            if failCount > 0:
+                Logger.log("Action {} succeeded after {} failures".format(action.__name__, failCount))
+
             return result
 
         except exceptions.BadRequest:
@@ -18,6 +24,11 @@ def actionWithRetry(action, *args):
             return
 
         except Exception as e:
-            Logger.log("Action {} failed with error message: {}, retrying in 10 seconds...".format(action.__name__, e))
+            failCount += 1
+
+            if failCount == 1:
+                Logger.log("Action {} failed with error message: {}".format(action.__name__, e))
+                Logger.log("Stacktrace:\n{}".format("".join(traceback.format_stack())))
+
             sleep(10)
             continue
