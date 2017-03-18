@@ -11,7 +11,7 @@ Global config object
 Access values by using getKey and setKey, don't access directly from here
 
 Required props: "value", "prompt", "index" (index to have a fixed order for prompting)
-Optional props: "default", "caseInsensitive", "promptFunc" (e.g. getpass.getpass for passwords)
+Optional props: "default", "caseInsensitive", "allowedValues", "promptFunc" (e.g. getpass.getpass for passwords)
 '''
 config = {
     "scriptName": {"index": 0, "value": None, "prompt": "Enter script name (the same as in praw.ini)"},
@@ -21,6 +21,7 @@ config = {
     # "username": {"index": 4, "value": None, "prompt": "PG-API Username"},
     # "password": {"index": 5, "value": None, "prompt": "PG-API Password", "promptFunc": getpass.getpass},
     # "pgApiUrl": {"index": 6, "value": None, "prompt": "PG-API URL", "default": PG_API_URL},
+    "printLogs": {"index": 7, "value": None, "prompt": "Print logs to stdout", "default": "n", "allowedValues": ['y', 'n']},
 }
 
 
@@ -42,9 +43,19 @@ def promptKey(keyName, promptFunc = input):
     if "default" in config[keyName]:
         prompt += " (default: {})".format(config[keyName]["default"])
 
+    if "allowedValues" in config[keyName]:
+        prompt += " ({})".format("/".join(config[keyName]["allowedValues"]))
+
     while True:
         value = promptFunc(prompt + ": ")
-        if value != "":
+
+        valid = True
+        if "allowedValues" in config[keyName] and value not in config[keyName]["allowedValues"]:
+            valid = False
+        if value == "":
+            valid = False
+
+        if valid:
             break
 
     setKey(keyName, value)
