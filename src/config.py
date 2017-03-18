@@ -1,6 +1,8 @@
 import getpass
 import json
 
+from const import *
+
 FileName = "data/config.json"
 
 '''
@@ -18,6 +20,7 @@ config = {
     "ownerName": {"index": 3, "value": None, "prompt": "Enter your reddit username"},
     # "username": {"index": 4, "value": None, "prompt": "PG-API Username"},
     # "password": {"index": 5, "value": None, "prompt": "PG-API Password", "promptFunc": getpass.getpass},
+    # "pgApiUrl": {"index": 6, "value": None, "prompt": "PG-API URL", "default": PG_API_URL},
 }
 
 

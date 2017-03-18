@@ -21,7 +21,6 @@ ARCHIVE_URL = CONVS_URL + "/{}/archive"
 COMMENT_URL = "/comments/{postId}/_/{commentId}"
 VERSION_URL = "https://raw.githubusercontent.com/hswhite33/picturegame-bot/master/VERSION"
 PG_API_URL = "http://pg-api.w5qpeynevs.us-west-2.elasticbeanstalk.com"
-#PG_API_URL = "http://localhost:5000"
 
 PLUSCORRECT_REPLY = '''Congratulations, that was the correct answer! Please continue the game as soon as possible. 
 You have been PM'd the instructions for continuing the game.

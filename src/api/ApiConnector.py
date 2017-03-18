@@ -2,7 +2,6 @@ import json
 import requests
 
 import config
-from const import PG_API_URL
 from save import Logger
 
 def tryRequest(state, method, *args):
@@ -17,7 +16,7 @@ def tryRequest(state, method, *args):
 def login(state):
     username, password = config.getKey("username"), config.getKey("password")
     
-    request = requests.post(PG_API_URL + "/login", 
+    request = requests.post(config.getKey("pgApiUrl") + "/login", 
             data = json.dumps({ "username": username, "password": password }),
             headers = { "Content-Type": "application/json" })
 
@@ -38,7 +37,7 @@ def post(token, roundNumber, submission):
         "url": submission.url,
     }
 
-    request = requests.post(PG_API_URL + "/rounds/" + str(roundNumber),
+    request = requests.post(config.getKey("pgApiUrl") + "/rounds/" + str(roundNumber),
             data = json.dumps(roundData),
             headers = {
                 "Content-Type": "application/json",
@@ -65,7 +64,7 @@ def put(token, roundNumber, winningComment):
         "winnerName": winningComment.author.name,
     }
 
-    request = requests.put(PG_API_URL + "/rounds/" + str(roundNumber),
+    request = requests.put(config.getKey("pgApiUrl") + "/rounds/" + str(roundNumber),
             data = json.dumps(roundData),
             headers = {
                 "Content-Type": "application/json",
