@@ -74,7 +74,7 @@ def onRoundOver(state, comment):
 
     # actionWithRetry(ApiConnector.tryRequest, state, ApiConnector.put, state.roundNumber, winningComment)
 
-    actionWithRetry(Post.deleteExtraPosts, state, comment.submission) # delete extra posts before anything else so we don't accidentally delete the next round
+    actionWithRetry(Post.deleteExtraPosts, state) # delete extra posts before anything else so we don't accidentally delete the next round
 
     replyComment = actionWithRetry(winningComment.reply, PLUSCORRECT_REPLY)
     actionWithRetry(replyComment.mod.distinguish)

@@ -75,15 +75,12 @@ def checkForStrays(state, currentSubmission):
         state.seenPosts.add(submission.id)
 
 
-def deleteExtraPosts(state, previousRound):
+def deleteExtraPosts(state):
     '''Delete any posts that were made during the previous round. Ignore self (mod) posts'''
 
-    for submission in state.subreddit.new():
-        if submission.created_utc <= previousRound.created_utc:
-            return
-
-        if not submission.is_self:
-            actionWithRetry(state.subreddit.mod.remove, submission)
+    for postId in state.commentedRoundIds:
+        submission = state.reddit.submission(postId)
+        actionWithRetry(state.subreddit.mod.remove, submission)
 
 
 def checkDeleted(state, submission):
