@@ -1,13 +1,15 @@
+import getpass
 import json
 import os
 import praw
-import getpass
 
 import config
 from const import *
+
 from . import Logger
-from reddit import Wiki
+
 from actions.Retry import actionWithRetry
+from reddit import Wiki
 
 
 def initialValuesFromSubreddit(subreddit, botName):

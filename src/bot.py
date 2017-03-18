@@ -1,18 +1,22 @@
 #!/usr/bin/python3
 
+import praw
+from threading import Thread
 from time import sleep
 import urllib.request
-from threading import Thread
-import praw
 
-from save.State import State
-from save.ImportExportHelper import loadOrGenerateConfig
-from reddit import Comment, Post, Mail, User
 import config
 from const import *
-from save import Logger
+
 from actions.Retry import actionWithRetry 
+
 from api import ApiConnector
+
+from reddit import Comment, Post, Mail, User
+
+from save import Logger
+from save.ImportExportHelper import loadOrGenerateConfig
+from save.State import State
 
 
 def listenForComments(state):

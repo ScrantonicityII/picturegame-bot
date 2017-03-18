@@ -1,13 +1,15 @@
 import json
 import os
-
-from . import ImportExportHelper
 import praw
+
 import config
 from const import *
+
+from . import ImportExportHelper
 from . import Logger
-from reddit import Wiki
+
 from actions.Retry import actionWithRetry
+from reddit import Wiki
 
 class State:
     '''Singleton State object - initialised once at the start of the program.

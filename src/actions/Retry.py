@@ -1,5 +1,5 @@
-from time import sleep
 from prawcore import exceptions
+from time import sleep
 
 from save import Logger
 
