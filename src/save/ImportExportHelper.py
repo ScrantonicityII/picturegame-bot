@@ -35,7 +35,7 @@ def initialValuesFromSubreddit(subreddit, botName):
 def getRoundWonTime(submission, botName):
     submission.comments.replace_more(limit = 0)
     for comment in submission.comments.list():
-        if comment.author is not None and comment.author.name == botName and comment.body.strip().startswith("Congratulations"):
+        if comment.author is not None and comment.author.name.lower() == botName and comment.body.strip().startswith("Congratulations"):
             return comment.created_utc
 
     # If we can't find anything (e.g. if it's abandoned) just use the submitted time of the post

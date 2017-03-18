@@ -9,12 +9,12 @@ Global config object
 Access values by using getKey and setKey, don't access directly from here
 
 Required props: "value", "prompt", "index" (index to have a fixed order for prompting)
-Optional props: "default", "promptFunc" (e.g. getpass.getpass for passwords)
+Optional props: "default", "caseInsensitive", "promptFunc" (e.g. getpass.getpass for passwords)
 '''
 config = {
     "scriptName": {"index": 0, "value": None, "prompt": "Enter script name (the same as in praw.ini)"},
-    "botName": {"index": 1, "value": None, "prompt": "Enter the reddit username of the bot"},
-    "subredditName": {"index": 2, "value": None, "prompt": "Enter the name of the subreddit"},
+    "botName": {"index": 1, "value": None, "prompt": "Enter the reddit username of the bot", "caseInsensitive": True},
+    "subredditName": {"index": 2, "value": None, "prompt": "Enter the name of the subreddit", "caseInsensitive": True},
     "ownerName": {"index": 3, "value": None, "prompt": "Enter your reddit username"},
     # "username": {"index": 4, "value": None, "prompt": "PG-API Username"},
     # "password": {"index": 5, "value": None, "prompt": "PG-API Password", "promptFunc": getpass.getpass},
@@ -26,6 +26,9 @@ def getKey(keyName):
 
 
 def setKey(keyName, value):
+    if config[keyName].get("caseInsensitive"):
+        value = value.lower()
+
     config[keyName]["value"] = value
 
 

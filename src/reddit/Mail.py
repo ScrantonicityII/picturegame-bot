@@ -9,6 +9,6 @@ def archiveModMail(state):
     for convId in conversations:
         conv = conversations[convId]
         if conv["subject"] == "you are an approved submitter" and \
-                len(conv["authors"]) == 1 and conv["authors"][0]["name"] == config.getKey("botName"):
+                len(conv["authors"]) == 1 and conv["authors"][0]["name"].lower() == config.getKey("botName"):
             state.reddit.post(ARCHIVE_URL.format(convId))
             return
