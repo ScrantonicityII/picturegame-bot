@@ -22,7 +22,7 @@ def validate(state, comment):
     correcter = comment.author.name
     receiver = receivingComment.author.name
 
-    if receiver in DISALLOWED_NAMES.union({state.currentHost, config.getKey("botName")}):
+    if receiver.lower() in DISALLOWED_NAMES.union({state.currentHost.lower(), config.getKey("botName")}):
         return False
 
     return correcter in state.mods.union({state.currentHost}) and \

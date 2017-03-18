@@ -1,6 +1,6 @@
 import re
 
-AUTOMOD = "AutoModerator"
+AUTOMOD = "automoderator"
 DISALLOWED_NAMES = {AUTOMOD}
 
 TITLE_PATTERN = re.compile("^\[round \d+\]", re.I) # ignore case
