@@ -16,7 +16,7 @@ Optional props: "default", "caseInsensitive", "allowedValues", "promptFunc" (e.g
 config = {
     "scriptName": {"index": 0, "value": None, "prompt": "Enter script name (the same as in praw.ini)"},
     "botName": {"index": 1, "value": None, "prompt": "Enter the reddit username of the bot", "caseInsensitive": True},
-    "subredditName": {"index": 2, "value": None, "prompt": "Enter the name of the subreddit", "caseInsensitive": True},
+    "subredditName": {"index": 2, "value": None, "prompt": "Enter the name of the subreddit"},
     "ownerName": {"index": 3, "value": None, "prompt": "Enter your reddit username"},
     # "username": {"index": 4, "value": None, "prompt": "PG-API Username"},
     # "password": {"index": 5, "value": None, "prompt": "PG-API Password", "promptFunc": getpass.getpass},
