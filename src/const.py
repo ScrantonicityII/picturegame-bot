@@ -22,12 +22,15 @@ COMMENT_URL = "/comments/{postId}/_/{commentId}"
 VERSION_URL = "https://raw.githubusercontent.com/hswhite33/picturegame-bot/master/VERSION"
 PG_API_URL = "http://pg-api.w5qpeynevs.us-west-2.elasticbeanstalk.com"
 
-PLUSCORRECT_REPLY = '''Congratulations, that was the correct answer! Please continue the game as soon as possible. 
-You have been PM'd the instructions for continuing the game.
-\n\n
+COMMENT_FOOTER = '''
+
 ---
 ^^I ^^am ^^a ^^bot. ^^If ^^I ^^don't ^^work, ^^please [^^PM ^^my ^^master](http://www.reddit.com/message/compose/?to=Provium) 
-^^or [^^message ^^the ^^moderators.](http://www.reddit.com/message/compose?to=%2Fr%2FPictureGame)'''
+^^or [^^message ^^the ^^moderators.](http://www.reddit.com/message/compose?to=%2Fr%2FPictureGame)    
+[^^Learn ^^more](/r/PictureGame_Bot)'''
+
+PLUSCORRECT_REPLY = '''Congratulations, that was the correct answer! Please continue the game as soon as possible. 
+You have been PM'd the instructions for continuing the game.''' + COMMENT_FOOTER
 
 WINNER_SUBJECT = "Congratulations, you can post the next round!"
 WINNER_PM = '''
@@ -45,7 +48,7 @@ WINNER_PM = '''
 >[Submit a new Round](http://www.reddit.com/r/{subredditName}/submit?title=[Round%20{roundNum}])
 
 ---
-^First ^time ^winning? ^See ^the [^hosting ^guide](/r/picturegame/wiki/hosting)'''
+^First ^time ^winning? ^See ^the [^hosting ^guide](/r/picturegame/wiki/hosting)''' + COMMENT_FOOTER
 
 ROUND_OVER_STICKY = '''#Congratulations to {winnerName} on winning this round!
 
@@ -53,13 +56,13 @@ The correct answer was:
 
 {spoileredAnswer}
 
-[Go to winning comment]({commentLink})'''
+[Go to winning comment]({commentLink})''' + COMMENT_FOOTER
 
 REJECTION_COMMENT = '''Your submission has been rejected because you have not titled it correctly!
 
 Please re-post your round with the following title:
 
-[{correctTitle}](http://www.reddit.com/r/{subredditName}/submit?title={correctTitle})'''
+[{correctTitle}](http://www.reddit.com/r/{subredditName}/submit?title={correctTitle})''' + COMMENT_FOOTER
 
 NEW_ROUND_COMMENT = '''#*Chat*:
 
@@ -76,12 +79,12 @@ If a user guesses correctly simply respond with *+correct*, the bot will do the 
 **Confused or new?** See the [hosting guide](/r/{subredditName}/wiki/hosting) for the answer to all your problems.
 #*Other users*:
 
-Please remember *if you answer correctly you will need to host the next round.* **New?** See our [guide](/r/{subredditName}/wiki/beginners)'''
+Please remember *if you answer correctly you will need to host the next round.* **New?** See our [guide](/r/{subredditName}/wiki/beginners)''' + COMMENT_FOOTER
 
 DUPLICATE_ROUND_REPLY = '''It looks like you've posted something new while there is already a round ongoing [here]({roundUrl}).
 
 If you want this post to replace the earlier posting, please **delete the earlier posting**, and I will start watching this thread instead. Otherwise 
-this thread will be removed when the round is over.'''
+this thread will be removed when the round is over.''' + COMMENT_FOOTER
 
 LEADERBOARD_HEADER = '''# Leaderboard
 
