@@ -85,7 +85,7 @@ def onRoundOver(state, comment):
 
     actionWithRetry(roundWinner.message, WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
 
-    actionWithRetry(Comment.postSticky, state, winningComment)
+    actionWithRetry(Comment.postSticky, state, winningComment, roundWinner.name)
 
     state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
