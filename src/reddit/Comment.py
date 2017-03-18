@@ -29,9 +29,9 @@ def validate(state, comment):
             (receiver != correcter or correcter in state.mods)
 
 
-def postSticky(state, winningComment, roundWinner):
+def postSticky(winningComment, roundWinner):
     roundSubmission = winningComment.submission
-    commentLink = COMMENT_URL.format(postId = state.roundId, commentId = winningComment.id)
+    commentLink = COMMENT_URL.format(postId = roundSubmission.id, commentId = winningComment.id)
     roundAnswer = winningComment.body
 
     answerParts = [part.strip() for part in roundAnswer.split('\n')]

@@ -72,20 +72,20 @@ def onRoundOver(state, comment):
     roundWinner = winningComment.author
     Logger.log("Round {} won by {}".format(state.roundNumber, roundWinner.name))
 
+    Thread(target = roundOverBackgroundTasks,
+        args = (state.reddit, state.subreddit, state.currentHost, winningComment, roundWinner.name)
+    ).start()
+
     # actionWithRetry(ApiConnector.tryRequest, state, ApiConnector.put, state.roundNumber, winningComment)
 
     actionWithRetry(Post.deleteExtraPosts, state) # delete extra posts before anything else so we don't accidentally delete the next round
 
-    replyComment = actionWithRetry(winningComment.reply, PLUSCORRECT_REPLY)
-    actionWithRetry(replyComment.mod.distinguish)
-
-    actionWithRetry(state.subreddit.contributor.remove, state.currentHost)
     actionWithRetry(state.subreddit.contributor.add, roundWinner.name)
-    actionWithRetry(Mail.archiveModMail, state)
+
+    # Can't do this in the other thread because it has to happen after adding the contrib
+    Thread(target = actionWithRetry, args = (Mail.archiveModMail, state.reddit)).start()
 
     actionWithRetry(roundWinner.message, WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
-
-    actionWithRetry(Comment.postSticky, state, winningComment, roundWinner.name)
 
     state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
@@ -93,6 +93,16 @@ def onRoundOver(state, comment):
 
     actionWithRetry(User.setFlair, state, roundWinner, winningComment)
     actionWithRetry(Post.setFlair, comment.submission, OVER_FLAIR)
+
+
+'''Run some of the round-over tasks that don't need to be in sequence in a different thread'''
+def roundOverBackgroundTasks(reddit, subreddit, currentHost, winningComment, winnerName):
+    replyComment = actionWithRetry(winningComment.reply, PLUSCORRECT_REPLY)
+    actionWithRetry(replyComment.mod.distinguish)
+
+    actionWithRetry(subreddit.contributor.remove, currentHost)
+
+    actionWithRetry(Comment.postSticky, winningComment, winnerName)
 
 
 def listenForPosts(state):
