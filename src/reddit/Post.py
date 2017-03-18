@@ -6,12 +6,25 @@ from const import *
 from actions.Retry import actionWithRetry
 from save import Logger
 
+flairChoiceCache = None
 
 def setFlair(submission, flair):
-    flairs = submission.flair.choices()
-    correctFlair = next(f for f in flairs if f["flair_text"] == flair)
-    flairId = correctFlair["flair_template_id"]
+    if flairChoiceCache is None:
+        getFlairChoices(submission)
+
+    flairId = flairChoiceCache[flair]
     submission.flair.select(flairId)
+
+
+def getFlairChoices(submission):
+    global flairChoiceCache
+
+    flairs = submission.flair.choices()
+    flairChoices = {}
+    for flair in flairs:
+        flairChoices[flair["flair_text"]] = flair["flair_template_id"]
+
+    flairChoiceCache = flairChoices
 
 
 def validate(state, submission):
