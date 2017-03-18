@@ -15,43 +15,56 @@ class State:
     '''Singleton State object - initialised once at the start of the program.
     Subsequent calls to State() return the same instance.'''
 
-    reddit = None
-    subreddit = None
-    mods = None
+    class __State:
+        def __init__(self):
+            Logger.log("Initialising State", 'w')
+            self.reddit = praw.Reddit(config.getKey("scriptName"))
+            self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
+            actionWithRetry(self.updateMods)
+            self.data = ImportExportHelper.importData(self)
+            self.updateVersion()
+            self.seenComments = set()
+            self.seenPosts = set()
+            self.commentedRoundIds = {} # keys = round ids, values = comment objects
+            self.apiSessionToken = ""
+
+        def updateMods(self):
+            self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
+
+        def updateVersion(self):
+            with open("VERSION") as versionFile:
+                self.seenVersion = versionFile.read().strip()
+
+
     instance = None
-    seenComments = None
-    seenPosts = None
-    commentedRoundIds = None # Dict keys = round ids, values = comment objects
-    seenVersion = ""
-    # apiSessionToken = ""
 
     def __init__(self):
         if not os.path.isdir("data"):
             os.mkdir("data")
 
         if not State.instance:
-            Logger.log("Initialising State", 'w')
-            self.reddit = praw.Reddit(config.getKey("scriptName"))
-            self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
-            actionWithRetry(self.updateMods)
-            self.instance = ImportExportHelper.importData(self)
-            self.updateVersion()
-            self.seenComments = set()
-            self.seenPosts = set()
-            self.commentedRoundIds = {}
+            State.instance = State.__State()
 
     def updateMods(self):
-        self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
+        self.instance.updateMods()
 
     def __getattr__(self, name):
         if name == "leaderboard":
             return actionWithRetry(Wiki.scrapeLeaderboard, self.subreddit)
-        return self.instance[name]
+
+        data = getattr(self.instance, "data")
+        if name in data:
+            return data[name]
+
+        return getattr(self.instance, name)
 
     def setState(self, values):
+        data = self.data
         for key in values.keys():
-            self.instance[key] = values[key]
-        ImportExportHelper.exportData(self.instance)
+            data[key] = values[key]
+
+        ImportExportHelper.exportData(data)
+        self.data = data
 
     def awardWin(self, username, comment):
         leaderboard = self.leaderboard
@@ -81,7 +94,3 @@ class State:
         })
 
         ImportExportHelper.exportLeaderboard(self.subreddit, leaderboard)
-
-    def updateVersion(self):
-        with open("VERSION") as versionFile:
-            self.seenVersion = versionFile.read().strip()
