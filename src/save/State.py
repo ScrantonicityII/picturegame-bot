@@ -78,11 +78,7 @@ class State:
             "currentHost": username,
             "unsolved": False,
             "roundWonTime": roundWonTime,
-            "roundWinner": {
-                "wins": numWins,
-                "rounds": rounds
-                }
-            })
+        })
 
         ImportExportHelper.exportLeaderboard(self.subreddit, leaderboard)
 

@@ -1,7 +1,11 @@
 from const import LOW_FLAIR_PATTERN, HIGH_FLAIR_PATTERN
 
+from save.ImportExportHelper import loadCachedLeaderboardStats
+
 def setFlair(state, user, comment):
-    numWins = state.roundWinner["wins"]
+    winData = loadCachedLeaderboardStats(user.name)
+    numWins = winData["wins"]
+
     oldFlair = comment.author_flair_text or ""
     flairText = ""
     customFlair = ""
@@ -13,7 +17,7 @@ def setFlair(state, user, comment):
         return # don't update flair if it doesn't match the given format
 
     if numWins < 8:
-        rounds = state.roundWinner["rounds"]
+        rounds = winData["rounds"]
         flairText = "Round " + ", ".join([str(roundNum) for roundNum in rounds])
         if numWins > 1:
             customFlair = LOW_FLAIR_PATTERN(numWins - 1).sub("", oldFlair)

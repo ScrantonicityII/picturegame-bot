@@ -99,6 +99,16 @@ def exportLeaderboard(subreddit, leaderboard):
         leaderboardFile.write(json.dumps(leaderboard))
 
 
+def loadCachedLeaderboardStats(username):
+    leaderboardData = {}
+
+    with open("data/leaderboard.json") as leaderboardFile:
+        leaderboardData = json.loads(leaderboardFile.read())
+
+    if username in leaderboardData:
+        return leaderboardData[username]
+
+
 def loadOrGenerateConfig():
     if not os.path.isfile(config.FileName):
         Logger.log("First time use, generating config.json")
