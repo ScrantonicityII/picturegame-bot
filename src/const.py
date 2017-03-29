@@ -4,7 +4,7 @@ AUTOMOD = "automoderator"
 DISALLOWED_NAMES = {AUTOMOD}
 
 TITLE_PATTERN = re.compile("^\[round \d+\]", re.I) # ignore case
-TITLE_CORRECTION_PATTERN = re.compile("^\s*[\(\{\[\<]?\s*round\s*\d*\s*[\)\}\]\>]?\s*:?\s*", re.I)
+TITLE_CORRECTION_PATTERN = re.compile("^\s*[\(\{\[\<]?\s*(round)?\s*\d*\s*[\)\}\]\>]?\s*:?\s*", re.I)
 CORRECT_PATTERN = re.compile("\+correct")
 HIGH_FLAIR_PATTERN = re.compile("^(\d+ wins)|$")
 
