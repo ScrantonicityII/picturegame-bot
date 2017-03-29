@@ -105,7 +105,7 @@ def checkAbandoned(state, submission):
         Logger.log("Round abandoned, cleaning up")
 
         actionWithRetry(state.subreddit.contributor.remove, state.currentHost)
-        actionWithRetry(deleteExtraPosts, state, submission)
+        actionWithRetry(deleteExtraPosts, state)
 
         submittedTime = actionWithRetry(lambda s: s.created_utc, submission)
         state.setState({ "unsolved": False, "roundNumber": state.roundNumber + 1, "roundWonTime": submittedTime })
