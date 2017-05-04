@@ -85,7 +85,7 @@ def importData(state):
 
 
 def exportData(data):
-    Logger.log("Exporting data to data.json")
+    Logger.log("Exporting data to data.json", 'd')
     with open("data/data.json", 'w') as dataFile:
         dataFile.write(json.dumps(data))
 
@@ -94,7 +94,7 @@ def exportLeaderboard(subreddit, leaderboard):
     Logger.log("Exporting leaderboard to subreddit")
     Wiki.exportLeaderboard(subreddit, leaderboard)
 
-    Logger.log("Backing up leaderboard to leaderboard.json")
+    Logger.log("Backing up leaderboard to leaderboard.json", 'd')
     with open("data/leaderboard.json", 'w') as leaderboardFile:
         leaderboardFile.write(json.dumps(leaderboard))
 

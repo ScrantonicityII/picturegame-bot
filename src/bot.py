@@ -76,6 +76,8 @@ def onRoundOver(state, comment):
         args = (state.reddit, state.subreddit, state.currentHost, winningComment, roundWinner.name)
     ).start()
 
+    groupId = Logger.log("Starting main thread tasks", 'd', discard = False)
+
     # actionWithRetry(ApiConnector.tryRequest, state, ApiConnector.put, state.roundNumber, winningComment)
 
     actionWithRetry(Post.deleteExtraPosts, state) # delete extra posts before anything else so we don't accidentally delete the next round
@@ -94,15 +96,19 @@ def onRoundOver(state, comment):
     actionWithRetry(User.setFlair, state, roundWinner, winningComment)
     actionWithRetry(Post.setFlair, comment.submission, OVER_FLAIR)
 
+    Logger.log("Main thread tasks finished", 'd', groupId)
+
 
 '''Run some of the round-over tasks that don't need to be in sequence in a different thread'''
 def roundOverBackgroundTasks(reddit, subreddit, currentHost, winningComment, winnerName):
+    groupId = Logger.log("Starting background tasks", 'd', discard = False)
     replyComment = actionWithRetry(winningComment.reply, PLUSCORRECT_REPLY)
     actionWithRetry(replyComment.mod.distinguish)
 
     actionWithRetry(subreddit.contributor.remove, currentHost)
 
     actionWithRetry(Comment.postSticky, winningComment, winnerName)
+    Logger.log("Background tasks finished", 'd', groupId)
 
 
 def listenForPosts(state):

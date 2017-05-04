@@ -22,6 +22,7 @@ config = {
     # "password": {"index": 5, "value": None, "prompt": "PG-API Password", "promptFunc": getpass.getpass},
     # "pgApiUrl": {"index": 6, "value": None, "prompt": "PG-API URL", "default": PG_API_URL},
     "printLogs": {"index": 7, "value": None, "prompt": "Print logs to stdout", "default": "n", "allowedValues": ['y', 'n']},
+    "logLevel": {"index": 8, "value": None, "prompt": "Log level", "default": "w", "allowedValues": ["err", "warn", "info", "debug"], "firstChar": True, "caseInsensitive": True},
 }
 
 
@@ -37,28 +38,54 @@ def setKey(keyName, value):
 
 
 def promptKey(keyName, promptFunc = input):
-    value = "" if "default" not in config[keyName] else config[keyName]["default"]
+    default = config[keyName].get("default", None)
 
     prompt = config[keyName]["prompt"]
-    if "default" in config[keyName]:
-        prompt += " (default: {})".format(config[keyName]["default"])
+    if default is not None:
+        prompt += " (default: {})".format(default)
 
     if "allowedValues" in config[keyName]:
-        prompt += " ({})".format("/".join(config[keyName]["allowedValues"]))
+        prompt += " ({})".format("/".join(
+            [transformValue(v, config[keyName].get("firstChar")) for v in config[keyName]["allowedValues"]]))
 
     while True:
         value = promptFunc(prompt + ": ")
+        if config[keyName].get("firstChar") and len(value) > 0:
+            value = value[0]
+
+        if config[keyName].get("caseInsensitive"):
+            value = value.lower()
 
         valid = True
-        if "allowedValues" in config[keyName] and value not in config[keyName]["allowedValues"]:
-            valid = False
+        if "allowedValues" in config[keyName]:
+            allowedValues = config[keyName]["allowedValues"]
+            if config[keyName].get("firstChar"):
+                found = next((x for x in allowedValues if x[0] == value.lower()), None)
+                if found is None:
+                    valid = False
+            elif value not in allowedValues:
+                valid = False
+
         if value == "":
-            valid = False
+            if default is None:
+                valid = False
+            else:
+                valid = True
 
         if valid:
             break
 
+    if value == "" and default is not None:
+        value = default
+
     setKey(keyName, value)
+
+
+def transformValue(value, firstLetter):
+    if firstLetter:
+        return "[{}]{}".format(value[0], value[1:])
+    else:
+        return value
 
 
 def loadConfig():

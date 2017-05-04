@@ -17,7 +17,7 @@ class State:
 
     class __State:
         def __init__(self):
-            Logger.log("Initialising State", 'w')
+            Logger.log("Initialising State")
             self.reddit = praw.Reddit(config.getKey("scriptName"))
             self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
             actionWithRetry(self.updateMods)
