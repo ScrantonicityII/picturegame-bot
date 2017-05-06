@@ -179,7 +179,7 @@ def main():
     state = State()
     # ApiConnector.login(state)
 
-    versionThread = Thread(target = checkVersion, args = (state,))
+    versionThread = Thread(target = checkVersion, args = (state,), daemon = True)
     versionThread.start()
 
     try:
