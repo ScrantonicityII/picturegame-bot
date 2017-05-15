@@ -1,15 +1,15 @@
-import getpass
 import json
 import os
+
 import praw
 
 import config
-from const import *
-
-from . import Logger
+from const import TITLE_PATTERN, UNSOLVED_FLAIR
 
 from actions.Retry import retry
 from reddit import Wiki
+
+from . import Logger
 
 
 @retry
@@ -19,9 +19,11 @@ def initialValuesFromSubreddit(subreddit, botName):
     initialValues = {}
     for submission in subreddit.new(limit=5):
         if submission.author is not None and submission.banned_by is None and \
-                submission.link_flair_text is not None and \
-                TITLE_PATTERN.match(submission.title):
-            initialValues["roundNumber"] = int(submission.title[submission.title.index(' ') + 1 : submission.title.index(']')])
+            submission.link_flair_text is not None and \
+            TITLE_PATTERN.match(submission.title):
+
+            initialValues["roundNumber"] = int(
+                submission.title[submission.title.index(' ') + 1 : submission.title.index(']')])
             initialValues["roundId"] = submission.id
             initialValues["currentHost"] = submission.author.name
             initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
@@ -39,7 +41,9 @@ def initialValuesFromSubreddit(subreddit, botName):
 def getRoundWonTime(submission, botName):
     submission.comments.replace_more(limit = 0)
     for comment in submission.comments.list():
-        if comment.author is not None and comment.author.name.lower() == botName and comment.body.strip().startswith("Congratulations"):
+        if comment.author is not None and \
+            comment.author.name.lower() == botName and \
+            comment.body.strip().startswith("Congratulations"):
             return comment.created_utc
 
     # If we can't find anything (e.g. if it's abandoned) just use the submitted time of the post

@@ -18,10 +18,10 @@ def tryRequest(state, method, *args):
 
 def login(state):
     username, password = config.getKey("username"), config.getKey("password")
-    
-    request = requests.post(config.getKey("pgApiUrl") + "/login", 
-            data = json.dumps({ "username": username, "password": password }),
-            headers = { "Content-Type": "application/json" })
+
+    request = requests.post(config.getKey("pgApiUrl") + "/login",
+        data = json.dumps({ "username": username, "password": password }),
+        headers = { "Content-Type": "application/json" })
 
     if request.status_code == 401:
         print("Failed to get auth token for PG API - check username and password")
@@ -41,11 +41,11 @@ def post(token, roundNumber, submission):
     }
 
     request = requests.post(config.getKey("pgApiUrl") + "/rounds/" + str(roundNumber),
-            data = json.dumps(roundData),
-            headers = {
-                "Content-Type": "application/json",
-                "X-Picturegame-Session": token,
-            })
+        data = json.dumps(roundData),
+        headers = {
+            "Content-Type": "application/json",
+            "X-Picturegame-Session": token,
+        })
 
     if request.status_code == 401:
         # Session token must have expired, time for a new one
@@ -53,7 +53,8 @@ def post(token, roundNumber, submission):
 
     if request.status_code != 200:
         # Probably a 500, shouldn't ever happen unless there's API downtime
-        Logger.log("HTTP status code {} while attempting to post round {} to PG API".format(request.status_code, roundNumber), 'e')
+        Logger.log("HTTP status code {} while attempting to post round {} to PG API".format(
+            request.status_code, roundNumber), 'e')
 
     else:
         Logger.log("Successfully pushed round {} to the PG API".format(roundNumber))
@@ -68,17 +69,18 @@ def put(token, roundNumber, winningComment):
     }
 
     request = requests.put(config.getKey("pgApiUrl") + "/rounds/" + str(roundNumber),
-            data = json.dumps(roundData),
-            headers = {
-                "Content-Type": "application/json",
-                "X-Picturegame-Session": token,
-            })
+        data = json.dumps(roundData),
+        headers = {
+            "Content-Type": "application/json",
+            "X-Picturegame-Session": token,
+        })
 
     if request.status_code == 401:
         return False
 
     if request.status_code != 200:
-        Logger.log("HTTP status code {} while attempt to put round {} to PG API".format(request.status_code, roundNumber), 'e')
+        Logger.log("HTTP status code {} while attempt to put round {} to PG API".format(
+            request.status_code, roundNumber), 'e')
 
     else:
         Logger.log("Successfully putted round {} to the PG API".format(roundNumber))

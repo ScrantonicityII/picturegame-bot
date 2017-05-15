@@ -1,7 +1,8 @@
 import re
 
 import config
-from const import *
+from const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, \
+    DUPLICATE_ROUND_REPLY, ABANDONED_FLAIRS
 
 from actions.Retry import retry
 from save import Logger
@@ -51,16 +52,17 @@ def validate(state, submission):
 def rejectIfInvalid(state, submission):
     '''Lock and comment on a new round if it is titled incorrectly'''
 
-    correctTitlePattern = re.compile("^\[Round {}\]".format(state.roundNumber), re.I)
+    correctTitlePattern = re.compile(r"^\[Round {}\]".format(state.roundNumber), re.I)
     roundTitle = submission.title
 
     if not correctTitlePattern.match(roundTitle):
         titleRemainder = TITLE_CORRECTION_PATTERN.sub("", roundTitle)
         correctTitle = "[Round {}] {}".format(state.roundNumber, titleRemainder)
 
-        utils.commentReply(submission, 
-                REJECTION_COMMENT.format(correctTitle = correctTitle, subredditName = config.getKey("subredditName")),
-                sticky = True)
+        utils.commentReply(submission,
+            REJECTION_COMMENT.format(
+                correctTitle = correctTitle, subredditName = config.getKey("subredditName")),
+            sticky = True)
 
         utils.removeThread(submission, lock = True)
         return False
@@ -73,10 +75,12 @@ def checkForStrays(state, currentSubmission):
     '''Comment on posts that are made while a round is active'''
 
     for submission in state.subreddit.new(limit=5):
-        if submission.created_utc <= currentSubmission.created_utc or submission.id in state.seenPosts:
+        if submission.created_utc <= currentSubmission.created_utc or \
+            submission.id in state.seenPosts:
             break
         if not submission.is_self:
-            utils.commentReply(submission, DUPLICATE_ROUND_REPLY.format(roundUrl = currentSubmission.permalink))
+            reply = utils.commentReply(submission, DUPLICATE_ROUND_REPLY.format(
+                roundUrl = currentSubmission.permalink))
             state.commentedRoundIds[submission.id] = reply
         state.seenPosts.add(submission.id)
 
@@ -107,7 +111,8 @@ def checkDeleted(state, submission):
 
 @retry
 def checkAbandoned(state, submission):
-    '''Check if the current round has been flaired abandoned or terminated, or manually flaired over
+    '''Check if the current round has been flaired abandoned or terminated,
+    or manually flaired over.
     Bump up the round number and return to listening for rounds if it has'''
 
     if submission.link_flair_text in ABANDONED_FLAIRS:
@@ -117,7 +122,11 @@ def checkAbandoned(state, submission):
         deleteExtraPosts(state.reddit, state.commentedRoundIds)
 
         submittedTime = utils.getCreationTime(submission)
-        state.setState({ "unsolved": False, "roundNumber": state.roundNumber + 1, "roundWonTime": submittedTime })
+        state.setState({
+            "unsolved": False,
+            "roundNumber": state.roundNumber + 1,
+            "roundWonTime": submittedTime
+        })
         return True
 
     return False

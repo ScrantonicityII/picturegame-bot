@@ -1,7 +1,5 @@
-from time import sleep
-
 import config
-from const import *
+from const import CONVS_URL, ARCHIVE_URL
 from actions.Retry import retry
 
 @retry
@@ -11,6 +9,7 @@ def archiveModMail(reddit):
     for convId in conversations:
         conv = conversations[convId]
         if conv["subject"] == "you are an approved submitter" and \
-                len(conv["authors"]) == 1 and conv["authors"][0]["name"].lower() == config.getKey("botName"):
+            len(conv["authors"]) == 1 and \
+            conv["authors"][0]["name"].lower() == config.getKey("botName"):
             reddit.post(ARCHIVE_URL.format(convId))
             return

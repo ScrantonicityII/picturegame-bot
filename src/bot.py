@@ -29,22 +29,26 @@ def listenForComments(state):
         currentSubmission = state.reddit.submission(id = state.roundId)
 
         Post.checkForStrays(state, currentSubmission)
-        
+
         if Post.checkDeleted(state, currentSubmission):
             return
 
         if Post.checkAbandoned(state, currentSubmission):
             return
 
-        # Can use `limit = None` to unpack the entire tree in one line, but this is very inefficient in large threads
+        # Can use `limit = None` to unpack the entire tree in one line,
+        # but this is very inefficient in large threads
         leftovers = currentSubmission.comments.replace_more(limit = 0)
 
-        commentSet = {comment for comment in currentSubmission.comments.list() if comment.id not in state.seenComments}
+        commentSet = {comment for comment in currentSubmission.comments.list() \
+                if comment.id not in state.seenComments}
         state.seenComments = state.seenComments.union({comment.id for comment in commentSet})
 
-        # Traverse the `MoreComments` trees, but ignore any that have not had any more comments since the last update
-        # Unfortunately this method cannot open `continue this thread` handles, so comments beyond a depth of 10 will not be seen by the bot
-        # This still allows reading of unlimited top-level comments, which is the main use-case for PG, and maintains decent performance
+        # Traverse the `MoreComments` trees, but ignore any that have not had any more comments
+        # since the last update. Unfortunately this method cannot open `continue this thread`
+        # handles, so comments beyond a depth of 10 will not be seen by the bot. This still allows
+        # reading of unlimited top-level comments, which is the main use-case for PG, and maintains
+        # decent performance.
         while len(leftovers):
             commentTree = leftovers.pop()
             if forestState.get(commentTree.id, -1) < commentTree.count:
@@ -82,11 +86,14 @@ def onRoundOver(state, comment):
 
     # ApiConnector.tryRequest(state, ApiConnector.put, state.roundNumber, winningComment)
 
-    Post.deleteExtraPosts(state.reddit, state.commentedRoundIds) # delete extra posts before anything else so we don't accidentally delete the next round
+    # Delete extra posts before anything else so we don't accidentally delete the next round
+    Post.deleteExtraPosts(state.reddit, state.commentedRoundIds)
 
     utils.addContributor(state.reddit, state.subreddit, roundWinner.name)
     utils.sendMessage(roundWinner,
-            WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
+        WINNER_SUBJECT,
+        WINNER_PM.format(
+            roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
 
     state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
@@ -135,16 +142,18 @@ def onNewRoundPosted(state, submission):
     if postAuthor != state.currentHost: # de-perm the original +CP if someone else took over
         utils.removeContributor(state.subreddit, state.currentHost)
 
-    utils.commentReply(submission, NEW_ROUND_COMMENT.format(hostName = postAuthor, subredditName = config.getKey("subredditName")))
+    utils.commentReply(submission,
+        NEW_ROUND_COMMENT.format(
+            hostName = postAuthor, subredditName = config.getKey("subredditName")))
 
     if submission.id in state.commentedRoundIds:
         utils.deleteComment(state.commentedRoundIds[submission.id])
     state.commentedRoundIds = {}
 
     newState = {
-            "unsolved": True,
-            "roundId": submission.id
-            }
+        "unsolved": True,
+        "roundId": submission.id
+    }
     if postAuthor != state.currentHost:
         newState["currentHost"] = postAuthor
 

@@ -1,15 +1,13 @@
-import json
 import os
 import praw
 
 import config
-from const import *
-
-from . import ImportExportHelper
-from . import Logger
 
 from actions.Retry import retry
 from reddit import Wiki, utils
+
+from . import ImportExportHelper
+from . import Logger
 
 class State:
     '''Singleton State object - initialised once at the start of the program.
@@ -83,9 +81,9 @@ class State:
             rounds = [roundNumber]
 
         leaderboard[username] = {
-                "wins": numWins,
-                "rounds": rounds
-                }
+            "wins": numWins,
+            "rounds": rounds,
+        }
 
         self.setState({
             "roundNumber": roundNumber + 1,

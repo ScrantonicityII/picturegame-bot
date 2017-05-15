@@ -30,7 +30,8 @@ def distinguishComment(comment, sticky = False):
 @retry
 def commentReply(submissionOrComment, reply, sticky = False):
     replyComment = submissionOrComment.reply(reply)
-    distinguishComment(replyComment)
+    distinguishComment(replyComment, sticky)
+    return replyComment
 
 
 @retry
@@ -40,7 +41,7 @@ def getPostAuthorName(submission):
 
 @retry
 def deleteComment(comment):
-    comment.delete
+    comment.delete()
 
 
 @retry

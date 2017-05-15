@@ -1,5 +1,5 @@
 import config
-from const import *
+from const import CORRECT_PATTERN, DISALLOWED_NAMES, COMMENT_URL, ROUND_OVER_STICKY
 
 from actions.Retry import retry
 from reddit import utils
@@ -26,11 +26,12 @@ def validate(state, comment):
     correcter = comment.author.name
     receiver = receivingComment.author.name
 
-    if receiver.lower() in DISALLOWED_NAMES.union({state.currentHost.lower(), config.getKey("botName")}):
+    if receiver.lower() in DISALLOWED_NAMES.union(
+        { state.currentHost.lower(), config.getKey("botName") }):
         return False
 
     return correcter in state.mods.union({state.currentHost}) and \
-            (receiver != correcter or correcter in state.mods)
+        (receiver != correcter or correcter in state.mods)
 
 
 @retry
@@ -40,11 +41,13 @@ def postSticky(winningComment, roundWinner):
     roundAnswer = winningComment.body
 
     answerParts = [part.strip() for part in roundAnswer.split('\n')]
-    spoileredAnswer = "   \n".join(["[{}](/spoiler)".format(part) for part in answerParts if part != ""])
+    spoileredAnswer = "   \n".join(
+        ["[{}](/spoiler)".format(part) for part in answerParts if part != ""])
 
-    utils.commentReply(roundSubmission, 
-            ROUND_OVER_STICKY.format(winnerName = roundWinner, spoileredAnswer = spoileredAnswer, commentLink = commentLink),
-            sticky = not roundHasSticky(roundSubmission))
+    utils.commentReply(roundSubmission,
+        ROUND_OVER_STICKY.format(
+            winnerName = roundWinner, spoileredAnswer = spoileredAnswer, commentLink = commentLink),
+        sticky = not roundHasSticky(roundSubmission))
 
 
 @retry
