@@ -8,10 +8,11 @@ from const import *
 
 from . import Logger
 
-from actions.Retry import actionWithRetry
+from actions.Retry import retry
 from reddit import Wiki
 
 
+@retry
 def initialValuesFromSubreddit(subreddit, botName):
     '''Pull the current subreddit status from Reddit if it is not held on file'''
 
@@ -26,7 +27,7 @@ def initialValuesFromSubreddit(subreddit, botName):
             initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
 
             if not initialValues["unsolved"]:
-                initialValues["roundWonTime"] = actionWithRetry(getRoundWonTime, submission, botName)
+                initialValues["roundWonTime"] = getRoundWonTime(submission, botName)
                 initialValues["roundNumber"] += 1 # Look for the NEXT round if it's over
 
             break
@@ -34,6 +35,7 @@ def initialValuesFromSubreddit(subreddit, botName):
     return initialValues
 
 
+@retry
 def getRoundWonTime(submission, botName):
     submission.comments.replace_more(limit = 0)
     for comment in submission.comments.list():
@@ -44,6 +46,7 @@ def getRoundWonTime(submission, botName):
     return submission.created_utc
 
 
+@retry
 def getRoundStatus(submission, botName):
     data = {}
     if submission.author is None or submission.banned_by is not None:
@@ -53,7 +56,7 @@ def getRoundStatus(submission, botName):
     else:
         data["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
         if not data["unsolved"]: # make sure we know when the previous round was won
-            data["roundWonTime"] = actionWithRetry(getRoundWonTime, submission, botName)
+            data["roundWonTime"] = getRoundWonTime(submission, botName)
 
     return data
 
@@ -64,7 +67,7 @@ def importData(state):
     if not os.path.isfile("data/data.json"):
         Logger.log("Generating new data.json")
 
-        initialValues = actionWithRetry(initialValuesFromSubreddit, state.subreddit, config.getKey("botName"))
+        initialValues = initialValuesFromSubreddit(state.subreddit, config.getKey("botName"))
         exportData(initialValues)
 
         return initialValues
@@ -76,7 +79,7 @@ def importData(state):
 
     currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
 
-    roundStatus = actionWithRetry(getRoundStatus, currentRoundSubmission, config.getKey("botName"))
+    roundStatus = getRoundStatus(currentRoundSubmission, config.getKey("botName"))
     data["unsolved"] = roundStatus["unsolved"]
     data["roundWonTime"] = roundStatus.get("roundWonTime", None)
 

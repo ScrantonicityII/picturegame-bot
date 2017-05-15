@@ -8,8 +8,8 @@ from const import *
 from . import ImportExportHelper
 from . import Logger
 
-from actions.Retry import actionWithRetry
-from reddit import Wiki
+from actions.Retry import retry
+from reddit import Wiki, utils
 
 class State:
     '''Singleton State object - initialised once at the start of the program.
@@ -20,7 +20,7 @@ class State:
             Logger.log("Initialising State")
             self.reddit = praw.Reddit(config.getKey("scriptName"))
             self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
-            actionWithRetry(self.updateMods)
+            self.updateMods()
             self.data = ImportExportHelper.importData(self)
             self.updateVersion()
             self.seenComments = set()
@@ -45,12 +45,13 @@ class State:
         if not State.instance:
             State.instance = State.__State()
 
+    @retry
     def updateMods(self):
         self.instance.updateMods()
 
     def __getattr__(self, name):
         if name == "leaderboard":
-            return actionWithRetry(Wiki.scrapeLeaderboard, self.subreddit)
+            return Wiki.scrapeLeaderboard(self.subreddit)
 
         data = getattr(self.instance, "data")
         if name in data:
@@ -69,7 +70,7 @@ class State:
     def awardWin(self, username, comment):
         leaderboard = self.leaderboard
         roundNumber = self.roundNumber
-        roundWonTime = actionWithRetry(lambda c: c.created_utc, comment)
+        roundWonTime = utils.getCreationTime(comment)
 
         numWins = 0
         rounds = []

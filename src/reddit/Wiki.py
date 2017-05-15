@@ -3,9 +3,10 @@ import re
 
 from const import *
 
-from actions.Retry import actionWithRetry
+from actions.Retry import retry
+from . import utils
 
-
+@retry
 def scrapeLeaderboard(subreddit):
     wikiPageData = subreddit.wiki["leaderboard"].content_md.split('\n')[4:-1] # first four rows are headers and last row is blank
     leaderboard = {}
@@ -40,4 +41,4 @@ def exportLeaderboard(subreddit, leaderboard):
                 leaderboard[name]["wins"]
                 )
 
-    actionWithRetry(subreddit.wiki["leaderboard"].edit, outputString)
+    utils.editWiki(subreddit.wiki, "leaderboard", outputString)

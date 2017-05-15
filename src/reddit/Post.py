@@ -3,11 +3,14 @@ import re
 import config
 from const import *
 
-from actions.Retry import actionWithRetry
+from actions.Retry import retry
 from save import Logger
+from . import utils
 
 flairChoiceCache = None
 
+
+@retry
 def setFlair(submission, flair):
     if flairChoiceCache is None:
         getFlairChoices(submission)
@@ -16,6 +19,7 @@ def setFlair(submission, flair):
     submission.flair.select(flairId)
 
 
+@retry
 def getFlairChoices(submission):
     global flairChoiceCache
 
@@ -27,6 +31,7 @@ def getFlairChoices(submission):
     flairChoiceCache = flairChoices
 
 
+@retry
 def validate(state, submission):
     '''Check that the post meets the following conditions:
     - was posted after the previous round was won
@@ -42,6 +47,7 @@ def validate(state, submission):
             submission.author is not None and submission.banned_by is None
 
 
+@retry
 def rejectIfInvalid(state, submission):
     '''Lock and comment on a new round if it is titled incorrectly'''
 
@@ -52,16 +58,17 @@ def rejectIfInvalid(state, submission):
         titleRemainder = TITLE_CORRECTION_PATTERN.sub("", roundTitle)
         correctTitle = "[Round {}] {}".format(state.roundNumber, titleRemainder)
 
-        rejectionReply = actionWithRetry(submission.reply, REJECTION_COMMENT.format(correctTitle = correctTitle, subredditName = config.getKey("subredditName")))
-        rejectionReply.mod.distinguish(sticky = True)
+        utils.commentReply(submission, 
+                REJECTION_COMMENT.format(correctTitle = correctTitle, subredditName = config.getKey("subredditName")),
+                sticky = True)
 
-        actionWithRetry(submission.mod.lock)
-        actionWithRetry(state.subreddit.mod.remove, submission)
+        utils.removeThread(submission, lock = True)
         return False
 
     return True
 
 
+@retry
 def checkForStrays(state, currentSubmission):
     '''Comment on posts that are made while a round is active'''
 
@@ -69,20 +76,21 @@ def checkForStrays(state, currentSubmission):
         if submission.created_utc <= currentSubmission.created_utc or submission.id in state.seenPosts:
             break
         if not submission.is_self:
-            reply = actionWithRetry(submission.reply, DUPLICATE_ROUND_REPLY.format(roundUrl = currentSubmission.permalink))
-            actionWithRetry(reply.mod.distinguish)
+            utils.commentReply(submission, DUPLICATE_ROUND_REPLY.format(roundUrl = currentSubmission.permalink))
             state.commentedRoundIds[submission.id] = reply
         state.seenPosts.add(submission.id)
 
 
-def deleteExtraPosts(state):
+@retry
+def deleteExtraPosts(reddit, commentedRoundIds):
     '''Delete any posts that were made during the previous round. Ignore self (mod) posts'''
 
-    for postId in state.commentedRoundIds:
-        submission = state.reddit.submission(postId)
-        actionWithRetry(state.subreddit.mod.remove, submission)
+    for postId in commentedRoundIds:
+        submission = reddit.submission(postId)
+        utils.removeThread(submission)
 
 
+@retry
 def checkDeleted(state, submission):
     '''Check if the current round has been deleted or removed
     Return to listening for rounds if it has'''
@@ -90,13 +98,14 @@ def checkDeleted(state, submission):
     if submission.author is None or submission.banned_by is not None:
         Logger.log("Round deleted, going back to listening for rounds")
 
-        actionWithRetry(submission.flair.select, None)
+        utils.selectFlair(submission, None)
         state.setState({ "unsolved": False })
         return True
 
     return False
 
 
+@retry
 def checkAbandoned(state, submission):
     '''Check if the current round has been flaired abandoned or terminated, or manually flaired over
     Bump up the round number and return to listening for rounds if it has'''
@@ -104,10 +113,10 @@ def checkAbandoned(state, submission):
     if submission.link_flair_text in ABANDONED_FLAIRS:
         Logger.log("Round abandoned, cleaning up")
 
-        actionWithRetry(state.subreddit.contributor.remove, state.currentHost)
-        actionWithRetry(deleteExtraPosts, state)
+        utils.removeContributor(state.subreddit, state.currentHost)
+        deleteExtraPosts(state.reddit, state.commentedRoundIds)
 
-        submittedTime = actionWithRetry(lambda s: s.created_utc, submission)
+        submittedTime = utils.getCreationTime(submission)
         state.setState({ "unsolved": False, "roundNumber": state.roundNumber + 1, "roundWonTime": submittedTime })
         return True
 

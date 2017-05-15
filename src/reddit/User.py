@@ -1,7 +1,10 @@
 from const import LOW_FLAIR_PATTERN, HIGH_FLAIR_PATTERN
 
+from actions.Retry import retry
 from save.ImportExportHelper import loadCachedLeaderboardStats
 
+
+@retry
 def setFlair(state, user, comment):
     winData = loadCachedLeaderboardStats(user.name)
     numWins = winData["wins"]

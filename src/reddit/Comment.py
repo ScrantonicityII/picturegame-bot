@@ -1,6 +1,10 @@
 import config
 from const import *
 
+from actions.Retry import retry
+from reddit import utils
+
+@retry
 def validate(state, comment):
     '''Check that a comment is a valid +correct'''
 
@@ -29,6 +33,7 @@ def validate(state, comment):
             (receiver != correcter or correcter in state.mods)
 
 
+@retry
 def postSticky(winningComment, roundWinner):
     roundSubmission = winningComment.submission
     commentLink = COMMENT_URL.format(postId = roundSubmission.id, commentId = winningComment.id)
@@ -37,10 +42,12 @@ def postSticky(winningComment, roundWinner):
     answerParts = [part.strip() for part in roundAnswer.split('\n')]
     spoileredAnswer = "   \n".join(["[{}](/spoiler)".format(part) for part in answerParts if part != ""])
 
-    stickyReply = roundSubmission.reply(ROUND_OVER_STICKY.format(winnerName = roundWinner, spoileredAnswer = spoileredAnswer, commentLink = commentLink))
-    stickyReply.mod.distinguish(sticky = not roundHasSticky(roundSubmission))
+    utils.commentReply(roundSubmission, 
+            ROUND_OVER_STICKY.format(winnerName = roundWinner, spoileredAnswer = spoileredAnswer, commentLink = commentLink),
+            sticky = not roundHasSticky(roundSubmission))
 
 
+@retry
 def roundHasSticky(submission):
     submission.comments.replace_more(limit = 0)
     for comment in submission.comments.list():

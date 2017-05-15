@@ -2,7 +2,9 @@ from time import sleep
 
 import config
 from const import *
+from actions.Retry import retry
 
+@retry
 def archiveModMail(reddit):
     conversations = reddit.get(CONVS_URL)["conversations"]
 

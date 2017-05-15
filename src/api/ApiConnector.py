@@ -2,8 +2,11 @@ import json
 import requests
 
 import config
+from actions.Retry import retry
 from save import Logger
 
+
+@retry
 def tryRequest(state, method, *args):
     while True:
         if method(state.apiSessionToken, *args):

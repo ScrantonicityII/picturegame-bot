@@ -8,17 +8,18 @@ import urllib.request
 import config
 from const import *
 
-from actions.Retry import actionWithRetry 
+from actions.Retry import retry
 
 from api import ApiConnector
 
-from reddit import Comment, Post, Mail, User
+from reddit import Comment, Post, Mail, User, utils
 
 from save import Logger
 from save.ImportExportHelper import loadOrGenerateConfig
 from save.State import State
 
 
+@retry
 def listenForComments(state):
     Logger.log("Listening for +correct on round {}...".format(state.roundNumber))
 
@@ -27,12 +28,12 @@ def listenForComments(state):
     while True:
         currentSubmission = state.reddit.submission(id = state.roundId)
 
-        actionWithRetry(Post.checkForStrays, state, currentSubmission)
+        Post.checkForStrays(state, currentSubmission)
         
-        if actionWithRetry(Post.checkDeleted, state, currentSubmission):
+        if Post.checkDeleted(state, currentSubmission):
             return
 
-        if actionWithRetry(Post.checkAbandoned, state, currentSubmission):
+        if Post.checkAbandoned(state, currentSubmission):
             return
 
         # Can use `limit = None` to unpack the entire tree in one line, but this is very inefficient in large threads
@@ -60,13 +61,14 @@ def listenForComments(state):
 
         sortedComments = sorted(commentSet, key = lambda comment: comment.created_utc)
         for comment in sortedComments:
-            if actionWithRetry(Comment.validate, state, comment):
-                actionWithRetry(onRoundOver, state, comment)
+            if Comment.validate(state, comment):
+                onRoundOver(state, comment)
                 return
 
         sleep(10) # Wait a while before checking again to avoid doing too many requests
 
 
+@retry
 def onRoundOver(state, comment):
     winningComment = comment.parent()
     roundWinner = winningComment.author
@@ -78,23 +80,21 @@ def onRoundOver(state, comment):
 
     groupId = Logger.log("Starting main thread tasks", 'd', discard = False)
 
-    # actionWithRetry(ApiConnector.tryRequest, state, ApiConnector.put, state.roundNumber, winningComment)
+    # ApiConnector.tryRequest(state, ApiConnector.put, state.roundNumber, winningComment)
 
-    actionWithRetry(Post.deleteExtraPosts, state) # delete extra posts before anything else so we don't accidentally delete the next round
+    Post.deleteExtraPosts(state.reddit, state.commentedRoundIds) # delete extra posts before anything else so we don't accidentally delete the next round
 
-    actionWithRetry(state.subreddit.contributor.add, roundWinner.name)
-
-    # Can't do this in the other thread because it has to happen after adding the contrib
-    Thread(target = actionWithRetry, args = (Mail.archiveModMail, state.reddit)).start()
-
-    actionWithRetry(roundWinner.message, WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
+    utils.addContributor(state.reddit, state.subreddit, roundWinner.name)
+    utils.sendMessage(roundWinner,
+            WINNER_SUBJECT, WINNER_PM.format(roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
 
     state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
     state.seenPosts = set()
 
-    actionWithRetry(User.setFlair, state, roundWinner, winningComment)
-    actionWithRetry(Post.setFlair, comment.submission, OVER_FLAIR)
+    User.setFlair(state, roundWinner, winningComment)
+
+    Post.setFlair(comment.submission, OVER_FLAIR)
 
     Logger.log("Main thread tasks finished", 'd', groupId)
 
@@ -102,50 +102,48 @@ def onRoundOver(state, comment):
 '''Run some of the round-over tasks that don't need to be in sequence in a different thread'''
 def roundOverBackgroundTasks(reddit, subreddit, currentHost, winningComment, winnerName):
     groupId = Logger.log("Starting background tasks", 'd', discard = False)
-    replyComment = actionWithRetry(winningComment.reply, PLUSCORRECT_REPLY)
-    actionWithRetry(replyComment.mod.distinguish)
+    utils.commentReply(winningComment, PLUSCORRECT_REPLY)
 
-    actionWithRetry(subreddit.contributor.remove, currentHost)
+    utils.removeContributor(subreddit, currentHost)
 
-    actionWithRetry(Comment.postSticky, winningComment, winnerName)
+    Comment.postSticky(winningComment, winnerName)
     Logger.log("Background tasks finished", 'd', groupId)
 
 
+@retry
 def listenForPosts(state):
     Logger.log("Listening for new rounds...")
 
     for submission in state.subreddit.stream.submissions():
-        if actionWithRetry(Post.validate, state, submission):
-            if actionWithRetry(onNewRoundPosted, state, submission):
+        if Post.validate(state, submission):
+            if onNewRoundPosted(state, submission):
                 break
 
-
+@retry
 def onNewRoundPosted(state, submission):
-    actionWithRetry(state.updateMods)
+    state.updateMods()
 
-    # actionWithRetry(ApiConnector.tryRequest, state, ApiConnector.post, state.roundNumber, submission)
+    # ApiConnector.tryRequest(state, ApiConnector.post, state.roundNumber, submission)
 
-    postAuthor = actionWithRetry(lambda s: s.author.name, submission)
-    postId = actionWithRetry(lambda s: s.id, submission)
+    postAuthor = utils.getPostAuthorName(submission)
 
-    if not actionWithRetry(Post.rejectIfInvalid, state, submission):
+    if not Post.rejectIfInvalid(state, submission):
         return False
 
-    actionWithRetry(Post.setFlair, submission, UNSOLVED_FLAIR)
+    Post.setFlair(submission, UNSOLVED_FLAIR)
 
     if postAuthor != state.currentHost: # de-perm the original +CP if someone else took over
-        actionWithRetry(state.subreddit.contributor.remove, state.currentHost)
+        utils.removeContributor(state.subreddit, state.currentHost)
 
-    newRoundReply = actionWithRetry(submission.reply, NEW_ROUND_COMMENT.format(hostName = postAuthor, subredditName = config.getKey("subredditName")))
-    newRoundReply.mod.distinguish()
+    utils.commentReply(submission, NEW_ROUND_COMMENT.format(hostName = postAuthor, subredditName = config.getKey("subredditName")))
 
-    if postId in state.commentedRoundIds:
-        actionWithRetry(state.commentedRoundIds[postId].delete)
+    if submission.id in state.commentedRoundIds:
+        utils.deleteComment(state.commentedRoundIds[submission.id])
     state.commentedRoundIds = {}
 
     newState = {
             "unsolved": True,
-            "roundId": postId
+            "roundId": submission.id
             }
     if postAuthor != state.currentHost:
         newState["currentHost"] = postAuthor
@@ -155,6 +153,7 @@ def onNewRoundPosted(state, submission):
     return True
 
 
+@retry
 def fetchLatestVersion():
     webResource = urllib.request.urlopen(VERSION_URL)
     return str(webResource.read(), "utf-8").strip()
@@ -162,10 +161,10 @@ def fetchLatestVersion():
 
 def checkVersion(state):
     while True:
-        latestVersion = actionWithRetry(fetchLatestVersion)
+        latestVersion = fetchLatestVersion()
         if latestVersion != state.seenVersion:
             owner = state.reddit.redditor(config.getKey("ownerName"))
-            actionWithRetry(owner.message, NEW_VERSION_SUBJECT, NEW_VERSION_PM)
+            utils.sendMessage(owner, NEW_VERSION_SUBJECT, NEW_VERSION_PM)
             state.seenVersion = latestVersion
 
         sleep(86400) # Just check every day
@@ -185,9 +184,9 @@ def main():
     try:
         while True:
             if state.unsolved:
-                actionWithRetry(listenForComments, state)
+                listenForComments(state)
             else:
-                actionWithRetry(listenForPosts, state)
+                listenForPosts(state)
     except KeyboardInterrupt:
         print("\nExitting...")
     
