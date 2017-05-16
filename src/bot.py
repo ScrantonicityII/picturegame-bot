@@ -1,18 +1,20 @@
 #!/usr/bin/python3
 
-import praw
 from threading import Thread
 from time import sleep
 import urllib.request
 
+import praw
+
 from . import config
-from .const import *
+from .const import WINNER_SUBJECT, WINNER_PM, OVER_FLAIR, PLUSCORRECT_REPLY, UNSOLVED_FLAIR, \
+    NEW_ROUND_COMMENT, VERSION_URL, NEW_VERSION_SUBJECT, NEW_VERSION_PM
 
 from .actions.Retry import retry
 
 from .api import ApiConnector
 
-from .reddit import Comment, Post, Mail, User, utils
+from .reddit import Comment, Post, User, utils
 
 from .save import Logger
 from .save.ImportExportHelper import loadOrGenerateConfig
@@ -49,14 +51,14 @@ def listenForComments(state):
         # handles, so comments beyond a depth of 10 will not be seen by the bot. This still allows
         # reading of unlimited top-level comments, which is the main use-case for PG, and maintains
         # decent performance.
-        while len(leftovers):
+        while leftovers:
             commentTree = leftovers.pop()
             if forestState.get(commentTree.id, -1) < commentTree.count:
                 if commentTree.id != '_':
                     forestState[commentTree.id] = commentTree.count
 
                 for comment in commentTree.comments():
-                    if type(comment) == praw.models.reddit.comment.Comment:
+                    if isinstance(comment, praw.models.reddit.comment.Comment):
                         if comment.id not in state.seenComments:
                             state.seenComments.add(comment.id)
                             commentSet.add(comment)
@@ -79,7 +81,7 @@ def onRoundOver(state, comment):
     Logger.log("Round {} won by {}".format(state.roundNumber, roundWinner.name))
 
     Thread(target = roundOverBackgroundTasks,
-        args = (state.reddit, state.subreddit, state.currentHost, winningComment, roundWinner.name)
+        args = (state.subreddit, state.currentHost, winningComment, roundWinner.name)
     ).start()
 
     groupId = Logger.log("Starting main thread tasks", 'd', discard = False)
@@ -106,8 +108,9 @@ def onRoundOver(state, comment):
     Logger.log("Main thread tasks finished", 'd', groupId)
 
 
-'''Run some of the round-over tasks that don't need to be in sequence in a different thread'''
-def roundOverBackgroundTasks(reddit, subreddit, currentHost, winningComment, winnerName):
+def roundOverBackgroundTasks(subreddit, currentHost, winningComment, winnerName):
+    '''Run some of the round-over tasks that don't need to be in sequence in a different thread'''
+
     groupId = Logger.log("Starting background tasks", 'd', discard = False)
     utils.commentReply(winningComment, PLUSCORRECT_REPLY)
 
@@ -182,7 +185,7 @@ def checkVersion(state):
 def main():
     print("PictureGame Bot by Provium")
     print("Press ctrl+c to exit")
-    
+
     loadOrGenerateConfig()
     state = State()
     # ApiConnector.login(state)
@@ -198,7 +201,7 @@ def main():
                 listenForPosts(state)
     except KeyboardInterrupt:
         print("\nExitting...")
-    
+
 
 if __name__ == "__main__":
     main()

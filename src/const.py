@@ -1,15 +1,18 @@
+# pylint: disable=line-too-long
+
 import re
 
 AUTOMOD = "automoderator"
 DISALLOWED_NAMES = {AUTOMOD}
 
-TITLE_PATTERN = re.compile("^\[round \d+\]", re.I) # ignore case
-TITLE_CORRECTION_PATTERN = re.compile("^\s*[\(\{\[\<]?\s*(round)?\s*\d*\s*[\)\}\]\>]?\s*:?\s*", re.I)
-CORRECT_PATTERN = re.compile("\+correct")
-HIGH_FLAIR_PATTERN = re.compile("^(\d+ wins)|$")
+TITLE_PATTERN = re.compile(r"^\[round \d+\]", re.I) # ignore case
+TITLE_CORRECTION_PATTERN = re.compile(
+    r"^\s*[\(\{\[\<]?\s*(round)?\s*\d*\s*[\)\}\]\>]?\s*:?\s*", re.I)
+CORRECT_PATTERN = re.compile(r"\+correct")
+HIGH_FLAIR_PATTERN = re.compile(r"^(\d+ wins)|$")
 
 def LOW_FLAIR_PATTERN(numRounds):
-    pattern = "^(Round \d+(, \d+){0,%d})|$" % (numRounds - 1)
+    pattern = r"^(Round \d+(, \d+){0,%d})|$" % (numRounds - 1)
     return re.compile(pattern)
 
 UNSOLVED_FLAIR = "UNSOLVED"
@@ -29,7 +32,7 @@ COMMENT_FOOTER = '''
 ^^or [^^message ^^the ^^moderators.](http://www.reddit.com/message/compose?to=%2Fr%2FPictureGame)    
 [^^Learn ^^more](/r/PictureGame_Bot)'''
 
-PLUSCORRECT_REPLY = '''Congratulations, that was the correct answer! Please continue the game as soon as possible. 
+PLUSCORRECT_REPLY = '''Congratulations, that was the correct answer! Please continue the game as soon as possible.
 You have been PM'd the instructions for continuing the game.''' + COMMENT_FOOTER
 
 WINNER_SUBJECT = "Congratulations, you can post the next round!"
