@@ -1,7 +1,7 @@
 import getpass
 import json
 
-from const import *
+from .const import *
 
 FileName = "data/config.json"
 

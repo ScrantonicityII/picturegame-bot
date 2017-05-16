@@ -1,8 +1,8 @@
-import config
-from const import CORRECT_PATTERN, DISALLOWED_NAMES, COMMENT_URL, ROUND_OVER_STICKY
+from .. import config
+from ..const import CORRECT_PATTERN, DISALLOWED_NAMES, COMMENT_URL, ROUND_OVER_STICKY
 
-from actions.Retry import retry
-from reddit import utils
+from ..actions.Retry import retry
+from ..reddit import utils
 
 @retry
 def validate(state, comment):

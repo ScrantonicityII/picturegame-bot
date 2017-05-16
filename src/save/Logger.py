@@ -1,6 +1,6 @@
 from time import time, strftime
 
-import config
+from .. import config
 
 LEVELS = { 'e': 0, 'w': 1, 'i': 2, 'd': 3 }
 

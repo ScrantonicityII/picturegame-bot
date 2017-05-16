@@ -1,9 +1,9 @@
 import json
 import requests
 
-import config
-from actions.Retry import retry
-from save import Logger
+from .. import config
+from ..actions.Retry import retry
+from ..save import Logger
 
 
 @retry

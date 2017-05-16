@@ -1,11 +1,11 @@
 import re
 
-import config
-from const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, \
+from .. import config
+from ..const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, \
     DUPLICATE_ROUND_REPLY, ABANDONED_FLAIRS
 
-from actions.Retry import retry
-from save import Logger
+from ..actions.Retry import retry
+from ..save import Logger
 from . import utils
 
 flairChoiceCache = None

@@ -1,10 +1,10 @@
 import os
 import praw
 
-import config
+from .. import config
 
-from actions.Retry import retry
-from reddit import Wiki, utils
+from ..actions.Retry import retry
+from ..reddit import Wiki, utils
 
 from . import ImportExportHelper
 from . import Logger

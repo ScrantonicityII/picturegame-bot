@@ -2,7 +2,7 @@
 
 from threading import Thread
 
-from actions.Retry import retry
+from ..actions.Retry import retry
 from .Mail import archiveModMail
 
 

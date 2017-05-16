@@ -3,7 +3,7 @@ import traceback
 
 from prawcore import exceptions
 
-from save import Logger
+from ..save import Logger
 
 def retry(action):
     def actionWithRetry(*args, **kwargs):

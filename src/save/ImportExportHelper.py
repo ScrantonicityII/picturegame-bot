@@ -3,11 +3,11 @@ import os
 
 import praw
 
-import config
-from const import TITLE_PATTERN, UNSOLVED_FLAIR
+from .. import config
+from ..const import TITLE_PATTERN, UNSOLVED_FLAIR
 
-from actions.Retry import retry
-from reddit import Wiki
+from ..actions.Retry import retry
+from ..reddit import Wiki
 
 from . import Logger
 

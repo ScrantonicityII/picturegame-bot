@@ -1,7 +1,7 @@
-from const import LOW_FLAIR_PATTERN, HIGH_FLAIR_PATTERN
+from ..const import LOW_FLAIR_PATTERN, HIGH_FLAIR_PATTERN
 
-from actions.Retry import retry
-from save.ImportExportHelper import loadCachedLeaderboardStats
+from ..actions.Retry import retry
+from ..save.ImportExportHelper import loadCachedLeaderboardStats
 
 
 @retry

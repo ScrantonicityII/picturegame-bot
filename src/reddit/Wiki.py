@@ -1,8 +1,9 @@
 import re
 
-from const import LEADERBOARD_HEADER
+from ..const import LEADERBOARD_HEADER
 
-from actions.Retry import retry
+from ..actions.Retry import retry
+
 from . import utils
 
 @retry

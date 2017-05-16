@@ -1,6 +1,6 @@
-import config
-from const import CONVS_URL, ARCHIVE_URL
-from actions.Retry import retry
+from .. import config
+from ..const import CONVS_URL, ARCHIVE_URL
+from ..actions.Retry import retry
 
 @retry
 def archiveModMail(reddit):

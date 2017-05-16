@@ -5,18 +5,18 @@ from threading import Thread
 from time import sleep
 import urllib.request
 
-import config
-from const import *
+from . import config
+from .const import *
 
-from actions.Retry import retry
+from .actions.Retry import retry
 
-from api import ApiConnector
+from .api import ApiConnector
 
-from reddit import Comment, Post, Mail, User, utils
+from .reddit import Comment, Post, Mail, User, utils
 
-from save import Logger
-from save.ImportExportHelper import loadOrGenerateConfig
-from save.State import State
+from .save import Logger
+from .save.ImportExportHelper import loadOrGenerateConfig
+from .save.State import State
 
 
 @retry
