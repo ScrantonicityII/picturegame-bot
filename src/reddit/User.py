@@ -1,13 +1,12 @@
 from ..const import LOW_FLAIR_PATTERN, HIGH_FLAIR_PATTERN
 
 from ..actions.Retry import retry
-from ..save.ImportExportHelper import loadCachedLeaderboardStats
 
 
 @retry
-def setFlair(state, user, comment):
-    winData = loadCachedLeaderboardStats(user.name)
-    numWins = winData["wins"]
+def setFlair(state, winData, comment):
+    rounds = winData["roundList"]
+    numWins = len(rounds)
 
     oldFlair = comment.author_flair_text or ""
     flairText = ""
@@ -20,7 +19,6 @@ def setFlair(state, user, comment):
         return # don't update flair if it doesn't match the given format
 
     if numWins < 8:
-        rounds = winData["rounds"]
         flairText = "Round " + ", ".join([str(roundNum) for roundNum in rounds])
         if numWins > 1:
             customFlair = LOW_FLAIR_PATTERN(numWins - 1).sub("", oldFlair)
@@ -33,4 +31,4 @@ def setFlair(state, user, comment):
 
     newFlair = flairText + customFlair
 
-    state.subreddit.flair.set(user, text = newFlair, css_class = cssClass)
+    state.subreddit.flair.set(winData["username"], text = newFlair, css_class = cssClass)

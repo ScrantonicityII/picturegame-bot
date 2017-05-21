@@ -86,7 +86,7 @@ def onRoundOver(state, comment):
 
     groupId = Logger.log("Starting main thread tasks", 'd', discard = False)
 
-    # ApiConnector.tryRequest(state, ApiConnector.put, state.roundNumber, winningComment)
+    apiResponse = ApiConnector.put(state, state.roundNumber, winningComment)
 
     # Delete extra posts before anything else so we don't accidentally delete the next round
     Post.deleteExtraPosts(state.reddit, state.commentedRoundIds)
@@ -101,7 +101,7 @@ def onRoundOver(state, comment):
     state.seenComments = set()
     state.seenPosts = set()
 
-    User.setFlair(state, roundWinner, winningComment)
+    User.setFlair(state, apiResponse["newWinner"], winningComment)
 
     Post.setFlair(comment.submission, OVER_FLAIR)
 
@@ -133,12 +133,12 @@ def listenForPosts(state):
 def onNewRoundPosted(state, submission):
     state.updateMods()
 
-    # ApiConnector.tryRequest(state, ApiConnector.post, state.roundNumber, submission)
-
     postAuthor = utils.getPostAuthorName(submission)
 
     if not Post.rejectIfInvalid(state, submission):
         return False
+
+    ApiConnector.post(state, state.roundNumber, submission)
 
     Post.setFlair(submission, UNSOLVED_FLAIR)
 

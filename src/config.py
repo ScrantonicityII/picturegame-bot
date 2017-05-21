@@ -1,7 +1,7 @@
 import getpass
 import json
 
-#from .const import *
+from .const import PG_API_URL
 
 FileName = "data/config.json"
 
@@ -22,12 +22,12 @@ config = {
         "prompt": "Enter the name of the subreddit"},
     "ownerName": {"index": 3, "value": None,
         "prompt": "Enter your reddit username"},
-    # "username": {"index": 4, "value": None,
-    #    "prompt": "PG-API Username"},
-    # "password": {"index": 5, "value": None,
-    #    "prompt": "PG-API Password", "promptFunc": getpass.getpass},
-    # "pgApiUrl": {"index": 6, "value": None,
-    #    "prompt": "PG-API URL", "default": PG_API_URL},
+     "username": {"index": 4, "value": None,
+        "prompt": "PG-API Username"},
+     "password": {"index": 5, "value": None,
+        "prompt": "PG-API Password", "promptFunc": getpass.getpass},
+     "pgApiUrl": {"index": 6, "value": None,
+        "prompt": "PG-API URL", "default": PG_API_URL},
     "printLogs": {"index": 7, "value": None,
         "prompt": "Print logs to stdout", "default": "n", "allowedValues": ['y', 'n']},
     "logLevel": {"index": 8, "value": None,

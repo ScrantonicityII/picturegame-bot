@@ -5,6 +5,7 @@ from ..const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, \
     DUPLICATE_ROUND_REPLY, ABANDONED_FLAIRS
 
 from ..actions.Retry import retry
+from ..api import ApiConnector
 from ..save import Logger
 from . import utils
 
@@ -104,6 +105,7 @@ def checkDeleted(state, submission):
 
         utils.selectFlair(submission, None)
         state.setState({ "unsolved": False })
+        ApiConnector.delete(state, state.roundNumber)
         return True
 
     return False

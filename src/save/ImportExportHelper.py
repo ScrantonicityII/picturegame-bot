@@ -7,7 +7,6 @@ from .. import config
 from ..const import TITLE_PATTERN, UNSOLVED_FLAIR
 
 from ..actions.Retry import retry
-from ..reddit import Wiki
 
 from . import Logger
 
@@ -95,25 +94,6 @@ def exportData(data):
     Logger.log("Exporting data to data.json", 'd')
     with open("data/data.json", 'w') as dataFile:
         dataFile.write(json.dumps(data))
-
-
-def exportLeaderboard(subreddit, leaderboard):
-    Logger.log("Exporting leaderboard to subreddit")
-    Wiki.exportLeaderboard(subreddit, leaderboard)
-
-    Logger.log("Backing up leaderboard to leaderboard.json", 'd')
-    with open("data/leaderboard.json", 'w') as leaderboardFile:
-        leaderboardFile.write(json.dumps(leaderboard))
-
-
-def loadCachedLeaderboardStats(username):
-    leaderboardData = {}
-
-    with open("data/leaderboard.json") as leaderboardFile:
-        leaderboardData = json.loads(leaderboardFile.read())
-
-    if username in leaderboardData:
-        return leaderboardData[username]
 
 
 def loadOrGenerateConfig():

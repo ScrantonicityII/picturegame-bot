@@ -59,8 +59,3 @@ def selectFlair(submission, flair):
 @retry
 def getCreationTime(submissionOrComment):
     return submissionOrComment.created_utc
-
-
-@retry
-def editWiki(wiki, page, content):
-    wiki[page].edit(content)

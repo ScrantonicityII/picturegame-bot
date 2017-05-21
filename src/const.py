@@ -23,7 +23,8 @@ CONVS_URL = "/api/mod/conversations"
 ARCHIVE_URL = CONVS_URL + "/{}/archive"
 COMMENT_URL = "/comments/{postId}/_/{commentId}"
 VERSION_URL = "https://raw.githubusercontent.com/hswhite33/picturegame-bot/master/VERSION"
-PG_API_URL = "http://pg-api.w5qpeynevs.us-west-2.elasticbeanstalk.com"
+PG_API_URL = "http://ec2-54-200-76-76.us-west-2.compute.amazonaws.com"
+
 
 COMMENT_FOOTER = '''
 
@@ -88,12 +89,6 @@ DUPLICATE_ROUND_REPLY = '''It looks like you've posted something new while there
 
 If you want this post to replace the earlier posting, please **delete the earlier posting**, and I will start watching this thread instead. Otherwise 
 this thread will be removed when the round is over.''' + COMMENT_FOOTER
-
-LEADERBOARD_HEADER = '''# Leaderboard
-
-Rank | Username | Rounds won | Total |
-|:--:|:--:|:--|:--:|:--:|
-'''
 
 NEW_VERSION_SUBJECT = "New update to PictureGame Bot"
 NEW_VERSION_PM = '''There is a new version of `picturegame-bot` ready to download! Please update as soon as possible to get the latest features and fixes.

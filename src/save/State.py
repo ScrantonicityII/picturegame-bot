@@ -4,7 +4,7 @@ import praw
 from .. import config
 
 from ..actions.Retry import retry
-from ..reddit import Wiki, utils
+from ..reddit import utils
 
 from . import ImportExportHelper
 from . import Logger
@@ -48,9 +48,6 @@ class State:
         self.instance.updateMods()
 
     def __getattr__(self, name):
-        if name == "leaderboard":
-            return Wiki.scrapeLeaderboard(self.subreddit)
-
         data = getattr(self.instance, "data")
         if name in data:
             return data[name]
@@ -66,24 +63,11 @@ class State:
         self.data = data
 
     def awardWin(self, username, comment):
-        leaderboard = self.leaderboard
         roundNumber = self.roundNumber
         roundWonTime = utils.getCreationTime(comment)
 
         numWins = 0
         rounds = []
-
-        if username in leaderboard:
-            numWins = leaderboard[username]["wins"] + 1
-            rounds = leaderboard[username]["rounds"] + [roundNumber]
-        else:
-            numWins = 1
-            rounds = [roundNumber]
-
-        leaderboard[username] = {
-            "wins": numWins,
-            "rounds": rounds,
-        }
 
         self.setState({
             "roundNumber": roundNumber + 1,
@@ -91,5 +75,3 @@ class State:
             "unsolved": False,
             "roundWonTime": roundWonTime,
         })
-
-        ImportExportHelper.exportLeaderboard(self.subreddit, leaderboard)
