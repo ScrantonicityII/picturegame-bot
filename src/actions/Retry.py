@@ -29,13 +29,11 @@ def retry(action):
                     action.__name__), 'w')
                 return
 
-            except Exception as e:
+            except Exception:
                 failCount += 1
 
                 if failCount == 1:
-                    groupId = Logger.log("Action {} failed with error message: {}".format(
-                        action.__name__, e), 'e', discard = False)
-                    Logger.log("Stacktrace:\n{}".format("".join(traceback.format_stack())), 'e')
+                    groupId = Logger.log(traceback.format_exc(), 'e', discard = False)
 
                 sleep(10)
                 continue
