@@ -5,10 +5,12 @@ from ..actions.Retry import retry
 from ..reddit import utils
 
 @retry
-def validate(state, comment):
+def validate(comment, roundId, currentHost, mods):
     '''Check that a comment is a valid +correct'''
 
-    # Do some easy checks before we query Reddit
+    if comment.submission != roundId:
+        return False
+
     if not CORRECT_PATTERN.search(comment.body):
         return False
 
@@ -27,11 +29,11 @@ def validate(state, comment):
     receiver = receivingComment.author.name
 
     if receiver.lower() in DISALLOWED_NAMES.union(
-        { state.currentHost.lower(), config.getKey("botName") }):
+        { currentHost.lower(), config.getKey("botName") }):
         return False
 
-    return correcter in state.mods.union({state.currentHost}) and \
-        (receiver != correcter or correcter in state.mods)
+    return correcter in mods.union({currentHost}) and \
+        (receiver != correcter or correcter in mods)
 
 
 @retry

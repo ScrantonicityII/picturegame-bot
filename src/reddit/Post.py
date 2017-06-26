@@ -33,31 +33,29 @@ def getFlairChoices(submission):
 
 
 @retry
-def validate(state, submission):
+def validate(submission):
     '''Check that the post meets the following conditions:
-    - was posted after the previous round was won
     - is not a self post (rounds are always links, self posts must be mod posts)
     - is not locked
     - is not deleted/removed
     - is not already flaired
     '''
-    return submission.created_utc > state.roundWonTime and \
-            not submission.is_self and \
-            not submission.locked and \
-            submission.link_flair_text is None and \
-            submission.author is not None and submission.banned_by is None
+    return not submission.is_self and \
+        not submission.locked and \
+        submission.link_flair_text is None and \
+        submission.author is not None and submission.banned_by is None
 
 
 @retry
-def rejectIfInvalid(state, submission):
+def rejectIfInvalid(submission, roundNumber):
     '''Lock and comment on a new round if it is titled incorrectly'''
 
-    correctTitlePattern = re.compile(r"^\[Round {}\]".format(state.roundNumber), re.I)
+    correctTitlePattern = re.compile(r"^\[Round {}\]".format(roundNumber), re.I)
     roundTitle = submission.title
 
     if not correctTitlePattern.match(roundTitle):
         titleRemainder = TITLE_CORRECTION_PATTERN.sub("", roundTitle)
-        correctTitle = "[Round {}] {}".format(state.roundNumber, titleRemainder)
+        correctTitle = "[Round {}] {}".format(roundNumber, titleRemainder)
 
         utils.commentReply(submission,
             REJECTION_COMMENT.format(
@@ -68,21 +66,6 @@ def rejectIfInvalid(state, submission):
         return False
 
     return True
-
-
-@retry
-def checkForStrays(state, currentSubmission):
-    '''Comment on posts that are made while a round is active'''
-
-    for submission in state.subreddit.new(limit=5):
-        if submission.created_utc <= currentSubmission.created_utc or \
-            submission.id in state.seenPosts:
-            break
-        if not submission.is_self:
-            reply = utils.commentReply(submission, DUPLICATE_ROUND_REPLY.format(
-                roundUrl = currentSubmission.permalink))
-            state.commentedRoundIds[submission.id] = reply
-        state.seenPosts.add(submission.id)
 
 
 @retry

@@ -84,7 +84,7 @@ If a user guesses correctly simply respond with *+correct*, the bot will do the 
 
 Please remember *if you answer correctly you will need to host the next round.* **New?** See our [guide](/r/{subredditName}/wiki/beginners)''' + COMMENT_FOOTER
 
-DUPLICATE_ROUND_REPLY = '''It looks like you've posted something new while there is already a round ongoing [here]({roundUrl}).
+DUPLICATE_ROUND_REPLY = '''It looks like you've posted something new while there is already a round ongoing [here](https://redd.it/{roundId}).
 
 If you want this post to replace the earlier posting, please **delete the earlier posting**, and I will start watching this thread instead. Otherwise 
 this thread will be removed when the round is over.''' + COMMENT_FOOTER

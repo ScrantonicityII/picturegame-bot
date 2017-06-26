@@ -13,31 +13,6 @@ from . import Logger
 
 
 @retry
-def initialValuesFromSubreddit(subreddit, botName):
-    '''Pull the current subreddit status from Reddit if it is not held on file'''
-
-    initialValues = {}
-    for submission in subreddit.new(limit=5):
-        if submission.author is not None and submission.banned_by is None and \
-            submission.link_flair_text is not None and \
-            TITLE_PATTERN.match(submission.title):
-
-            initialValues["roundNumber"] = int(
-                submission.title[submission.title.index(' ') + 1 : submission.title.index(']')])
-            initialValues["roundId"] = submission.id
-            initialValues["currentHost"] = submission.author.name
-            initialValues["unsolved"] = submission.link_flair_text == UNSOLVED_FLAIR
-
-            if not initialValues["unsolved"]:
-                initialValues["roundWonTime"] = getRoundWonTime(submission, botName)
-                initialValues["roundNumber"] += 1 # Look for the NEXT round if it's over
-
-            break
-
-    return initialValues
-
-
-@retry
 def getRoundWonTime(submission, botName):
     submission.comments.replace_more(limit = 0)
     for comment in submission.comments.list():
@@ -65,36 +40,36 @@ def getRoundStatus(submission, botName):
     return data
 
 
-def importData(state):
-    '''Import subreddit status from file, or generate new'''
+@retry
+def importData(subreddit):
+    '''Pull the current subreddit status from Reddit'''
 
-    if not os.path.isfile("data/data.json"):
-        Logger.log("Generating new data.json")
+    botName = config.getKey("botName")
 
-        initialValues = initialValuesFromSubreddit(state.subreddit, config.getKey("botName"))
-        exportData(initialValues)
+    roundNumber = 0
+    roundId = ""
+    currentHost = ""
+    postTime = 0
 
-        return initialValues
+    for submission in subreddit.new(limit=5):
+        if submission.author is not None and submission.banned_by is None and \
+            submission.link_flair_text is not None and \
+            TITLE_PATTERN.match(submission.title):
 
-    Logger.log("Loading data from data.json")
-    data = {}
-    with open("data/data.json") as dataFile:
-        data = json.loads(dataFile.read())
+            roundNumber = int(
+                submission.title[submission.title.index(' ') + 1 : submission.title.index(']')])
+            roundId = submission.id
+            currentHost = submission.author.name
+            postTime = submission.created_utc
+            unsolved = submission.link_flair_text == UNSOLVED_FLAIR
 
-    currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
+            if not unsolved:
+                roundId = None
+                roundNumber += 1 # Look for the NEXT round if it's over
 
-    roundStatus = getRoundStatus(currentRoundSubmission, config.getKey("botName"))
-    data["unsolved"] = roundStatus["unsolved"]
-    data["roundWonTime"] = roundStatus.get("roundWonTime", None)
+            break
 
-    exportData(data)
-    return data
-
-
-def exportData(data):
-    Logger.log("Exporting data to data.json", 'd')
-    with open("data/data.json", 'w') as dataFile:
-        dataFile.write(json.dumps(data))
+    return (roundNumber, roundId, currentHost, postTime)
 
 
 def exportLeaderboard(subreddit, leaderboard):

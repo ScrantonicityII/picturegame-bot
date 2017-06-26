@@ -5,7 +5,7 @@ from ..save.ImportExportHelper import loadCachedLeaderboardStats
 
 
 @retry
-def setFlair(state, user, comment):
+def setFlair(subreddit, user, comment):
     winData = loadCachedLeaderboardStats(user.name)
     numWins = winData["wins"]
 
@@ -33,4 +33,4 @@ def setFlair(state, user, comment):
 
     newFlair = flairText + customFlair
 
-    state.subreddit.flair.set(user, text = newFlair, css_class = cssClass)
+    subreddit.flair.set(user, text = newFlair, css_class = cssClass)
