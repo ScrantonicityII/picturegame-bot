@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import praw
@@ -8,8 +9,6 @@ from ..const import TITLE_PATTERN, UNSOLVED_FLAIR
 
 from ..actions.Retry import retry
 from ..reddit import Wiki
-
-from . import Logger
 
 
 @retry
@@ -69,14 +68,14 @@ def importData(state):
     '''Import subreddit status from file, or generate new'''
 
     if not os.path.isfile("data/data.json"):
-        Logger.log("Generating new data.json")
+        logging.info("Generating new data.json")
 
         initialValues = initialValuesFromSubreddit(state.subreddit, config.getKey("botName"))
         exportData(initialValues)
 
         return initialValues
 
-    Logger.log("Loading data from data.json")
+    logging.info("Loading data from data.json")
     data = {}
     with open("data/data.json") as dataFile:
         data = json.loads(dataFile.read())
@@ -92,16 +91,16 @@ def importData(state):
 
 
 def exportData(data):
-    Logger.log("Exporting data to data.json", 'd')
+    logging.debug("Exporting data to data.json")
     with open("data/data.json", 'w') as dataFile:
         dataFile.write(json.dumps(data))
 
 
 def exportLeaderboard(subreddit, leaderboard):
-    Logger.log("Exporting leaderboard to subreddit")
+    logging.info("Exporting leaderboard to subreddit")
     Wiki.exportLeaderboard(subreddit, leaderboard)
 
-    Logger.log("Backing up leaderboard to leaderboard.json", 'd')
+    logging.debug("Backing up leaderboard to leaderboard.json")
     with open("data/leaderboard.json", 'w') as leaderboardFile:
         leaderboardFile.write(json.dumps(leaderboard))
 
@@ -118,8 +117,8 @@ def loadCachedLeaderboardStats(username):
 
 def loadOrGenerateConfig():
     if not os.path.isfile(config.FileName):
-        Logger.log("First time use, generating config.json")
+        logging.info("First time use, generating config.json")
         config.generateConfig()
 
-    Logger.log("Loading config.json")
+    logging.info("Loading config.json")
     config.loadConfig()

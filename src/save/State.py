@@ -1,3 +1,4 @@
+import logging
 import os
 import praw
 
@@ -7,7 +8,6 @@ from ..actions.Retry import retry
 from ..reddit import Wiki, utils
 
 from . import ImportExportHelper
-from . import Logger
 
 class State:
     '''Singleton State object - initialised once at the start of the program.
@@ -15,7 +15,7 @@ class State:
 
     class __State:
         def __init__(self):
-            Logger.log("Initialising State")
+            logging.info("Initialising State")
             self.reddit = praw.Reddit(config.getKey("scriptName"))
             self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
             self.updateMods()

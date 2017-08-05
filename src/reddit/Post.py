@@ -1,3 +1,4 @@
+import logging
 import re
 
 from .. import config
@@ -5,7 +6,6 @@ from ..const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, \
     DUPLICATE_ROUND_REPLY, ABANDONED_FLAIRS
 
 from ..actions.Retry import retry
-from ..save import Logger
 from . import utils
 
 flairChoiceCache = None
@@ -100,7 +100,7 @@ def checkDeleted(state, submission):
     Return to listening for rounds if it has'''
 
     if submission.author is None or submission.banned_by is not None:
-        Logger.log("Round deleted, going back to listening for rounds")
+        logging.info("Round deleted, going back to listening for rounds")
 
         utils.selectFlair(submission, None)
         state.setState({ "unsolved": False })
@@ -116,7 +116,7 @@ def checkAbandoned(state, submission):
     Bump up the round number and return to listening for rounds if it has'''
 
     if submission.link_flair_text in ABANDONED_FLAIRS:
-        Logger.log("Round abandoned, cleaning up")
+        logging.info("Round abandoned, cleaning up")
 
         utils.removeContributor(state.subreddit, state.currentHost)
         deleteExtraPosts(state.reddit, state.commentedRoundIds)

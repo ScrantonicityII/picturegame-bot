@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 
+import argparse
+import json
+import logging
+import logging.config
+import os
+import sys
 from threading import Thread
 from time import sleep
 import urllib.request
@@ -16,14 +22,13 @@ from .api import ApiConnector
 
 from .reddit import Comment, Post, User, utils
 
-from .save import Logger
 from .save.ImportExportHelper import loadOrGenerateConfig
 from .save.State import State
 
 
 @retry
 def listenForComments(state):
-    Logger.log("Listening for +correct on round {}...".format(state.roundNumber))
+    logging.info("Listening for +correct on round %d...", state.roundNumber)
 
     forestState = {}
 
@@ -78,13 +83,13 @@ def listenForComments(state):
 def onRoundOver(state, comment):
     winningComment = comment.parent()
     roundWinner = winningComment.author
-    Logger.log("Round {} won by {}".format(state.roundNumber, roundWinner.name))
+    logging.info("Round %d won by %s", state.roundNumber, roundWinner.name)
 
     Thread(target = roundOverBackgroundTasks,
         args = (state.subreddit, state.currentHost, winningComment, roundWinner.name)
     ).start()
 
-    groupId = Logger.log("Starting main thread tasks", 'd', discard = False)
+    logging.debug("Starting main thread tasks")
 
     # ApiConnector.tryRequest(state, ApiConnector.put, state.roundNumber, winningComment)
 
@@ -105,26 +110,27 @@ def onRoundOver(state, comment):
 
     Post.setFlair(comment.submission, OVER_FLAIR)
 
-    Logger.log("Main thread tasks finished", 'd', groupId)
+    logging.debug("Main thread tasks finished")
 
 
 def roundOverBackgroundTasks(subreddit, currentHost, winningComment, winnerName):
     '''Run some of the round-over tasks that don't need to be in sequence in a different thread'''
 
-    groupId = Logger.log("Starting background tasks", 'd', discard = False)
+    logging.debug("Starting background tasks")
     utils.commentReply(winningComment, PLUSCORRECT_REPLY)
 
     utils.removeContributor(subreddit, currentHost)
 
     Comment.postSticky(winningComment, winnerName)
-    Logger.log("Background tasks finished", 'd', groupId)
+    logging.debug("Background tasks finished")
 
 
 @retry
 def listenForPosts(state):
-    Logger.log("Listening for new rounds...")
+    logging.info("Listening for new rounds...")
 
     for submission in state.subreddit.stream.submissions():
+        logging.debug("saw post: %s", submission.id)
         if Post.validate(state, submission):
             if onNewRoundPosted(state, submission):
                 break
@@ -165,16 +171,32 @@ def onNewRoundPosted(state, submission):
     return True
 
 
+def setup():
+    with open('VERSION') as f:
+        print("PictureGame Bot {} by Provium".format(f.read().strip()))
+
+    parser = argparse.ArgumentParser(description="The /r/PictureGame Reddit Bot.")
+    parser.add_argument('--logConfig', type = str, required = True,
+        help = "Name of the file from which to load logging config" )
+
+    args = parser.parse_args()
+
+    if not os.path.isfile(args.logConfig):
+        print("File not found:", args.logConfig)
+        sys.exit()
+
+    with open(args.logConfig) as logConfig:
+        logging.config.dictConfig(json.loads(logConfig.read()))
+
+    logging.info("Setup successful")
 
 
 def main():
-    print("PictureGame Bot by Provium")
-    print("Press ctrl+c to exit")
-
+    setup()
     loadOrGenerateConfig()
     state = State()
-    # ApiConnector.login(state)
 
+    # ApiConnector.login(state)
 
     try:
         while True:

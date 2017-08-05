@@ -1,9 +1,8 @@
+import logging
 from time import sleep
 import traceback
 
 from prawcore import exceptions
-
-from ..save import Logger
 
 def retry(action):
     def actionWithRetry(*args, **kwargs):
@@ -17,23 +16,21 @@ def retry(action):
                 result = action(*args, **kwargs)
 
                 if failCount > 0:
-                    Logger.log("Action {} succeeded after {} failures".format(
-                        action.__name__, failCount), 'w', groupId)
+                    logging.warn("Action %s succeeded after %d failures", action.__name__, failCount)
 
                 return result
 
             except exceptions.BadRequest:
                 # Don't keep trying if we get a bad request
                 # This is likely caused by deleted accounts so we can safely ignore them
-                Logger.log("Action {} failed with HTTP status 400. Returning...".format(
-                    action.__name__), 'w')
+                logging.warn("Action %s failed with HTTP status 400. Returning...", action.__name__)
                 return
 
             except Exception:
                 failCount += 1
 
                 if failCount == 1:
-                    groupId = Logger.log(traceback.format_exc(), 'e', discard = False)
+                    logging.error(traceback.format_exc())
 
                 sleep(10)
                 continue

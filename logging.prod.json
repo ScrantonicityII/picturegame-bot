@@ -1,0 +1,36 @@
+{
+    "version": 1,
+    "formatters": {
+        "default": {
+            "format": "[%(asctime)s] %(levelname)s: %(message)s"
+        },
+        "error": {
+            "format": "[%(asctime)s] %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S %z"
+        }
+    },
+    "handlers": {
+        "file": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "formatter": "default",
+            "level": "INFO",
+            "filename": "data/bot.log",
+            "when": "w0",
+            "interval": 1,
+            "backupCount": 3
+        },
+        "error": {
+            "class": "logging.FileHandler",
+            "formatter": "error",
+            "level": "ERROR",
+            "filename": "data/error.log",
+            "mode": "w"
+        }
+    },
+    "loggers": {
+        "": {
+            "handlers": ["file", "error"],
+            "level": "DEBUG"
+        }
+    }
+}

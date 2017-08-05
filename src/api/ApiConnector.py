@@ -1,9 +1,9 @@
 import json
+import logging
 import requests
 
 from .. import config
 from ..actions.Retry import retry
-from ..save import Logger
 
 
 @retry
@@ -53,11 +53,11 @@ def post(token, roundNumber, submission):
 
     if request.status_code != 200:
         # Probably a 500, shouldn't ever happen unless there's API downtime
-        Logger.log("HTTP status code {} while attempting to post round {} to PG API".format(
-            request.status_code, roundNumber), 'e')
+        logging.error("HTTP status code %d while attempting to post round %d to PG API",
+            request.status_code, roundNumber)
 
     else:
-        Logger.log("Successfully pushed round {} to the PG API".format(roundNumber))
+        logging.info("Successfully pushed round %d to the PG API", roundNumber)
 
     return True
 
@@ -79,10 +79,10 @@ def put(token, roundNumber, winningComment):
         return False
 
     if request.status_code != 200:
-        Logger.log("HTTP status code {} while attempt to put round {} to PG API".format(
-            request.status_code, roundNumber), 'e')
+        logging.error("HTTP status code %d while attempt to put round %d to PG API",
+            request.status_code, roundNumber)
 
     else:
-        Logger.log("Successfully putted round {} to the PG API".format(roundNumber))
+        logging.info("Successfully putted round %d to the PG API", roundNumber)
 
     return True
