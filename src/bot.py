@@ -8,7 +8,7 @@ import praw
 
 from . import config
 from .const import WINNER_SUBJECT, WINNER_PM, OVER_FLAIR, PLUSCORRECT_REPLY, UNSOLVED_FLAIR, \
-    NEW_ROUND_COMMENT, VERSION_URL, NEW_VERSION_SUBJECT, NEW_VERSION_PM
+    NEW_ROUND_COMMENT
 
 from .actions.Retry import retry
 
@@ -165,21 +165,6 @@ def onNewRoundPosted(state, submission):
     return True
 
 
-@retry
-def fetchLatestVersion():
-    webResource = urllib.request.urlopen(VERSION_URL)
-    return str(webResource.read(), "utf-8").strip()
-
-
-def checkVersion(state):
-    while True:
-        latestVersion = fetchLatestVersion()
-        if latestVersion != state.seenVersion:
-            owner = state.reddit.redditor(config.getKey("ownerName"))
-            utils.sendMessage(owner, NEW_VERSION_SUBJECT, NEW_VERSION_PM)
-            state.seenVersion = latestVersion
-
-        sleep(86400) # Just check every day
 
 
 def main():
@@ -190,8 +175,6 @@ def main():
     state = State()
     # ApiConnector.login(state)
 
-    versionThread = Thread(target = checkVersion, args = (state,), daemon = True)
-    versionThread.start()
 
     try:
         while True:

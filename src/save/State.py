@@ -20,7 +20,6 @@ class State:
             self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
             self.updateMods()
             self.data = ImportExportHelper.importData(self)
-            self.updateVersion()
             self.seenComments = set()
             self.seenPosts = set()
             self.commentedRoundIds = {} # keys = round ids, values = comment objects
@@ -28,10 +27,6 @@ class State:
 
         def updateMods(self):
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
-
-        def updateVersion(self):
-            with open("VERSION") as versionFile:
-                self.seenVersion = versionFile.read().strip()
 
 
     instance = None

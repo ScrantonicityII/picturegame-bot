@@ -22,7 +22,6 @@ ABANDONED_FLAIRS = {OVER_FLAIR, "ABANDONED", "TERMINATED"}
 CONVS_URL = "/api/mod/conversations"
 ARCHIVE_URL = CONVS_URL + "/{}/archive"
 COMMENT_URL = "/comments/{postId}/_/{commentId}"
-VERSION_URL = "https://raw.githubusercontent.com/hswhite33/picturegame-bot/master/VERSION"
 PG_API_URL = "http://pg-api.w5qpeynevs.us-west-2.elasticbeanstalk.com"
 
 COMMENT_FOOTER = '''
@@ -95,11 +94,3 @@ Rank | Username | Rounds won | Total |
 |:--:|:--:|:--|:--:|:--:|
 '''
 
-NEW_VERSION_SUBJECT = "New update to PictureGame Bot"
-NEW_VERSION_PM = '''There is a new version of `picturegame-bot` ready to download! Please update as soon as possible to get the latest features and fixes.
-
-* Shut down the currently running instance of the bot
-* `git pull` to get the latest revision
-* Start me back up
-
-[Contact Provium](/message/compose?to=Provium) if you have any questions.'''
