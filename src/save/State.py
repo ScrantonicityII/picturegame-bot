@@ -1,24 +1,32 @@
+import configparser
+import json
 import logging
 import os
 import praw
 
-from .. import config
+from ..const import CONFIG_FILENAME
 
 from ..actions.Retry import retry
 from ..reddit import Wiki, utils
 
 from . import ImportExportHelper
 
+
 class State:
     '''Singleton State object - initialised once at the start of the program.
     Subsequent calls to State() return the same instance.'''
 
     class __State:
-        def __init__(self):
+        def __init__(self, args):
+            self.setupConfig(args.env)
+            self.setupLogging(args.logConfig)
+
             logging.info("Initialising State")
-            self.reddit = praw.Reddit(config.getKey("scriptName"))
-            self.subreddit = self.reddit.subreddit(config.getKey("subredditName"))
+
+            self.reddit = praw.Reddit(self.config["scriptName"])
+            self.subreddit = self.reddit.subreddit(self.config["subredditName"])
             self.updateMods()
+
             self.data = ImportExportHelper.importData(self)
             self.seenComments = set()
             self.seenPosts = set()
@@ -28,15 +36,27 @@ class State:
         def updateMods(self):
             self.mods = set(map(lambda mod: mod.name, self.subreddit.moderator()))
 
+        def setupConfig(self, sectionName):
+            config = configparser.ConfigParser(converters = {"lower": lambda x: x.lower()})
+            config.read(CONFIG_FILENAME)
+            self.config = config[sectionName]
+
+        def setupLogging(self, logConfigFile):
+            configFile = logConfigFile if logConfigFile is not None else self.config["logConfig"]
+            with open(configFile) as logConfig:
+                logging.config.dictConfig(json.loads(logConfig.read()))
+
+            logging.info("Successfully configured logging using config file %s", configFile)
+
 
     instance = None
 
-    def __init__(self):
+    def __init__(self, args):
         if not os.path.isdir("data"):
             os.mkdir("data")
 
         if not State.instance:
-            State.instance = State.__State()
+            State.instance = State.__State(args)
 
     @retry
     def updateMods(self):

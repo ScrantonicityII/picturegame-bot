@@ -2,14 +2,13 @@ import json
 import logging
 import requests
 
-from .. import config
 from ..actions.Retry import retry
 
 
 @retry
 def tryRequest(state, method, *args):
     while True:
-        if method(state.apiSessionToken, *args):
+        if method(state.config["pgApiUrl"], state.apiSessionToken, *args):
             return
         else:
             if not login(state):
@@ -17,9 +16,9 @@ def tryRequest(state, method, *args):
 
 
 def login(state):
-    username, password = config.getKey("username"), config.getKey("password")
+    username, password = state.config["username"], state.config["password"]
 
-    request = requests.post(config.getKey("pgApiUrl") + "/login",
+    request = requests.post(state.config["pgApiUrl"] + "/login",
         data = json.dumps({ "username": username, "password": password }),
         headers = { "Content-Type": "application/json" })
 
@@ -32,7 +31,7 @@ def login(state):
     return True
 
 
-def post(token, roundNumber, submission):
+def post(url, token, roundNumber, submission):
     roundData = {
         "hostName": submission.author.name,
         "permalink": submission.permalink,
@@ -40,7 +39,7 @@ def post(token, roundNumber, submission):
         "url": submission.url,
     }
 
-    request = requests.post(config.getKey("pgApiUrl") + "/rounds/" + str(roundNumber),
+    request = requests.post(url + "/rounds/" + str(roundNumber),
         data = json.dumps(roundData),
         headers = {
             "Content-Type": "application/json",
@@ -62,13 +61,13 @@ def post(token, roundNumber, submission):
     return True
 
 
-def put(token, roundNumber, winningComment):
+def put(url, token, roundNumber, winningComment):
     roundData = {
         "winTime": winningComment.created_utc,
         "winnerName": winningComment.author.name,
     }
 
-    request = requests.put(config.getKey("pgApiUrl") + "/rounds/" + str(roundNumber),
+    request = requests.put(url + "/rounds/" + str(roundNumber),
         data = json.dumps(roundData),
         headers = {
             "Content-Type": "application/json",

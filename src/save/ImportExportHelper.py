@@ -4,7 +4,6 @@ import os
 
 import praw
 
-from .. import config
 from ..const import TITLE_PATTERN, UNSOLVED_FLAIR
 
 from ..actions.Retry import retry
@@ -70,7 +69,7 @@ def importData(state):
     if not os.path.isfile("data/data.json"):
         logging.info("Generating new data.json")
 
-        initialValues = initialValuesFromSubreddit(state.subreddit, config.getKey("botName"))
+        initialValues = initialValuesFromSubreddit(state.subreddit, state.config.getlower("botName"))
         exportData(initialValues)
 
         return initialValues
@@ -82,7 +81,7 @@ def importData(state):
 
     currentRoundSubmission = praw.models.Submission(state.reddit, data["roundId"])
 
-    roundStatus = getRoundStatus(currentRoundSubmission, config.getKey("botName"))
+    roundStatus = getRoundStatus(currentRoundSubmission, state.config.getlower("botName"))
     data["unsolved"] = roundStatus["unsolved"]
     data["roundWonTime"] = roundStatus.get("roundWonTime", None)
 
@@ -113,12 +112,3 @@ def loadCachedLeaderboardStats(username):
 
     if username in leaderboardData:
         return leaderboardData[username]
-
-
-def loadOrGenerateConfig():
-    if not os.path.isfile(config.FileName):
-        logging.info("First time use, generating config.json")
-        config.generateConfig()
-
-    logging.info("Loading config.json")
-    config.loadConfig()

@@ -7,9 +7,9 @@ from .Mail import archiveModMail
 
 
 @retry
-def addContributor(reddit, subreddit, redditor):
+def addContributor(reddit, subreddit, redditor, botName):
     subreddit.contributor.add(redditor)
-    Thread(target = archiveModMail, args = (reddit, )).start()
+    Thread(target = archiveModMail, args = (reddit, botName)).start()
 
 
 @retry

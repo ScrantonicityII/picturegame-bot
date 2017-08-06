@@ -1,28 +1,22 @@
-#!/usr/bin/python3
-
 import argparse
-import json
 import logging
 import logging.config
 import os
 import sys
 from threading import Thread
 from time import sleep
-import urllib.request
 
 import praw
 
-from . import config
 from .const import WINNER_SUBJECT, WINNER_PM, OVER_FLAIR, PLUSCORRECT_REPLY, UNSOLVED_FLAIR, \
-    NEW_ROUND_COMMENT
+    NEW_ROUND_COMMENT, CONFIG_FILENAME
 
 from .actions.Retry import retry
 
-from .api import ApiConnector
+# from .api import ApiConnector
 
 from .reddit import Comment, Post, User, utils
 
-from .save.ImportExportHelper import loadOrGenerateConfig
 from .save.State import State
 
 
@@ -96,11 +90,12 @@ def onRoundOver(state, comment):
     # Delete extra posts before anything else so we don't accidentally delete the next round
     Post.deleteExtraPosts(state.reddit, state.commentedRoundIds)
 
-    utils.addContributor(state.reddit, state.subreddit, roundWinner.name)
+    utils.addContributor(state.reddit, state.subreddit, roundWinner.name,
+        state.config.getlower("botName"))
     utils.sendMessage(roundWinner,
         WINNER_SUBJECT,
         WINNER_PM.format(
-            roundNum = state.roundNumber + 1, subredditName = config.getKey("subredditName")))
+            roundNum = state.roundNumber + 1, subredditName = state.config["subredditName"]))
 
     state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
@@ -153,7 +148,7 @@ def onNewRoundPosted(state, submission):
 
     utils.commentReply(submission,
         NEW_ROUND_COMMENT.format(
-            hostName = postAuthor, subredditName = config.getKey("subredditName")))
+            hostName = postAuthor, subredditName = state.config["subredditName"]))
 
     if submission.id in state.commentedRoundIds:
         utils.deleteComment(state.commentedRoundIds[submission.id])
@@ -173,28 +168,35 @@ def onNewRoundPosted(state, submission):
 
 def setup():
     with open('VERSION') as f:
-        print("PictureGame Bot {} by Provium".format(f.read().strip()))
+        print("PictureGame Bot {} by Provium\n------\n".format(f.read().strip()))
 
     parser = argparse.ArgumentParser(description="The /r/PictureGame Reddit Bot.")
-    parser.add_argument('--logConfig', type = str, required = True,
-        help = "Name of the file from which to load logging config" )
+
+    parser.add_argument("--env", type = str, required = True,
+        help = "Name of the environment to use from bot.conf")
+    parser.add_argument("--logConfig", type = str,
+        help = "Name of the file from which to load logging config")
 
     args = parser.parse_args()
 
-    if not os.path.isfile(args.logConfig):
-        print("File not found:", args.logConfig)
+    valid = True
+
+    for fileName in [args.logConfig, CONFIG_FILENAME]:
+        if fileName is not None and not os.path.isfile(fileName):
+            print("File not found:", fileName)
+            valid = False
+
+    if not valid:
         sys.exit()
 
-    with open(args.logConfig) as logConfig:
-        logging.config.dictConfig(json.loads(logConfig.read()))
-
+    state = State(args)
     logging.info("Setup successful")
+
+    return state
 
 
 def main():
-    setup()
-    loadOrGenerateConfig()
-    state = State()
+    state = setup()
 
     # ApiConnector.login(state)
 
@@ -206,7 +208,3 @@ def main():
                 listenForPosts(state)
     except KeyboardInterrupt:
         print("\nExitting...")
-
-
-if __name__ == "__main__":
-    main()

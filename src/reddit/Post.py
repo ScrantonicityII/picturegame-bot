@@ -1,7 +1,6 @@
 import logging
 import re
 
-from .. import config
 from ..const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, \
     DUPLICATE_ROUND_REPLY, ABANDONED_FLAIRS
 
@@ -61,7 +60,7 @@ def rejectIfInvalid(state, submission):
 
         utils.commentReply(submission,
             REJECTION_COMMENT.format(
-                correctTitle = correctTitle, subredditName = config.getKey("subredditName")),
+                correctTitle = correctTitle, subredditName = state.config["subredditName"]),
             sticky = True)
 
         utils.removeThread(submission, lock = True)

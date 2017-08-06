@@ -1,4 +1,3 @@
-from .. import config
 from ..const import CORRECT_PATTERN, DISALLOWED_NAMES, COMMENT_URL, ROUND_OVER_STICKY
 
 from ..actions.Retry import retry
@@ -27,7 +26,7 @@ def validate(state, comment):
     receiver = receivingComment.author.name
 
     if receiver.lower() in DISALLOWED_NAMES.union(
-        { state.currentHost.lower(), config.getKey("botName") }):
+        { state.currentHost.lower(), state.config.getlower("botName") }):
         return False
 
     return correcter in state.mods.union({state.currentHost}) and \

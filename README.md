@@ -9,7 +9,7 @@ The new bot has all the same features of the old one, with some additions:
  * Remove incorrectly titled rounds and give the OP information about where they went wrong
 
 ## Dependencies
-The bot is built on the `praw` Reddit API wrapper, version 4. It is unknown if there are additional dependencies to run it on Windows, it has only been tested on Linux.
+* `PRAW` version 4 or 5. 5 is recommended for performance reasons.
 
 ## Installation
 * Install `praw`
@@ -27,10 +27,16 @@ user_agent=PictureGame Bot 2.0
 * Clone the bot
  * `git clone https://github.com/hswhite33/picturegame-bot.git`
 
+## Configuration
+Configuration must be stored in `bot.ini` in the same directory as `run.sh`. See `sample.ini` for details.
+
+In addition, config for logging must be specified in JSON format according to Python's specification [here](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig)
+Sample configs for both dev and prod are provided in the repo.
+
 ## Usage
 ```
 cd picturegame-bot
-./run.sh
+./run.sh --env <SectionName>
 ```
 
-* The first time you run the bot it will ask you to enter the name you entered in `praw.ini` (this is the name inside the square braces) as well as the subreddit name and username of the bot. This information will be saved in a config file for future use. 
+This will run the bot using the configuration under the `<SectionName>` section in `bot.ini`.

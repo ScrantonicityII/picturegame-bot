@@ -24,6 +24,8 @@ ARCHIVE_URL = CONVS_URL + "/{}/archive"
 COMMENT_URL = "/comments/{postId}/_/{commentId}"
 PG_API_URL = "http://pg-api.w5qpeynevs.us-west-2.elasticbeanstalk.com"
 
+CONFIG_FILENAME = "bot.ini"
+
 COMMENT_FOOTER = '''
 
 ---
@@ -93,4 +95,3 @@ LEADERBOARD_HEADER = '''# Leaderboard
 Rank | Username | Rounds won | Total |
 |:--:|:--:|:--|:--:|:--:|
 '''
-
