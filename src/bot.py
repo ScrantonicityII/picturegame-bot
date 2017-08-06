@@ -167,6 +167,9 @@ def onNewRoundPosted(state, submission):
 
 
 def setup():
+    if not os.path.isdir('data'):
+        os.mkdir('data')
+
     with open('VERSION') as f:
         print("PictureGame Bot {} by Provium\n------\n".format(f.read().strip()))
 
