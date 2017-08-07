@@ -9,6 +9,7 @@ The new bot has all the same features of the old one, with some additions:
  * Remove incorrectly titled rounds and give the OP information about where they went wrong
 
 ## Dependencies
+* `python` version 3.5 or above
 * `PRAW` version 4 or 5. 5 is recommended for performance reasons.
 
 ## Installation
