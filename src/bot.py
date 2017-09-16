@@ -125,7 +125,6 @@ def listenForPosts(state):
     logging.info("Listening for new rounds...")
 
     for submission in state.subreddit.stream.submissions():
-        logging.debug("saw post: %s", submission.id)
         if Post.validate(state, submission):
             if onNewRoundPosted(state, submission):
                 break
