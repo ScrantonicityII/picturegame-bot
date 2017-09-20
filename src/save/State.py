@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import praw
+import socket
 
 from ..const import CONFIG_FILENAME
 
@@ -23,6 +24,7 @@ class State:
 
             logging.info("Initialising State")
 
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.reddit = praw.Reddit(self.config["scriptName"])
             self.subreddit = self.reddit.subreddit(self.config["subredditName"])
             self.updateMods()
@@ -108,3 +110,5 @@ class State:
         })
 
         ImportExportHelper.exportLeaderboard(self.subreddit, leaderboard)
+
+        return numWins

@@ -2,9 +2,10 @@ import logging
 import re
 
 from ..const import TITLE_CORRECTION_PATTERN, REJECTION_COMMENT, \
-    DUPLICATE_ROUND_REPLY, ABANDONED_FLAIRS
+    DUPLICATE_ROUND_REPLY, ABANDONED_FLAIRS, OVER_FLAIR
 
 from ..actions.Retry import retry
+from ..discord import discord
 from . import utils
 
 flairChoiceCache = None
@@ -103,6 +104,9 @@ def checkDeleted(state, submission):
 
         utils.selectFlair(submission, None)
         state.setState({ "unsolved": False })
+
+        discord.sendSignal(state.config, state.socket, { "status": "deleted" })
+
         return True
 
     return False
@@ -126,6 +130,12 @@ def checkAbandoned(state, submission):
             "roundNumber": state.roundNumber + 1,
             "roundWonTime": submittedTime
         })
+
+        if submission.link_flair_text == OVER_FLAIR:
+            discord.sendSignal(state.config, state.socket, { "status": "solved" })
+        else:
+            discord.sendSignal(state.config, state.socket, { "status": "abandoned" })
+
         return True
 
     return False

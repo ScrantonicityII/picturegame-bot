@@ -15,6 +15,8 @@ from .actions.Retry import retry
 
 # from .api import ApiConnector
 
+from .discord import discord
+
 from .reddit import Comment, Post, User, utils
 
 from .save.State import State
@@ -97,13 +99,20 @@ def onRoundOver(state, comment):
         WINNER_PM.format(
             roundNum = state.roundNumber + 1, subredditName = state.config["subredditName"]))
 
-    state.awardWin(roundWinner.name, winningComment)
+    winCount = state.awardWin(roundWinner.name, winningComment)
     state.seenComments = set()
     state.seenPosts = set()
 
     User.setFlair(state, roundWinner, winningComment)
 
     Post.setFlair(comment.submission, OVER_FLAIR)
+
+    discord.sendSignal(state.config, state.socket, {
+        "status": "solved",
+        "winner": roundWinner.name,
+        "winCount": winCount,
+        "commentId": winningComment.id,
+    })
 
     logging.debug("Main thread tasks finished")
 
@@ -161,6 +170,14 @@ def onNewRoundPosted(state, submission):
         newState["currentHost"] = postAuthor
 
     state.setState(newState)
+
+    discord.sendSignal(state.config, state.socket, {
+        "status": "new",
+        "url": submission.url,
+        "id": submission.id,
+        "host": postAuthor,
+        "title": submission.title,
+    })
 
     return True
 
